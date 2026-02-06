@@ -7,8 +7,6 @@ let db: Firestore;
 export function getDb(): Firestore {
   if (!db) {
     if (getApps().length === 0) {
-      // If GOOGLE_APPLICATION_CREDENTIALS is set or running in Firebase/GCP,
-      // credentials are automatic. Otherwise use service account JSON from env.
       if (process.env.FIREBASE_SERVICE_ACCOUNT) {
         const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
         app = initializeApp({
@@ -16,9 +14,8 @@ export function getDb(): Firestore {
           projectId: serviceAccount.project_id,
         });
       } else {
-        app = initializeApp({
-          projectId: process.env.FIREBASE_PROJECT_ID,
-        });
+        // In Cloud Functions / Cloud Run, credentials are automatic
+        app = initializeApp();
       }
     } else {
       app = getApps()[0];
