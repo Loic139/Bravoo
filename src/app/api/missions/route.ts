@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getUserByToken } from "@/lib/auth";
 import { getTodaysMissions, getMissionTimeWindow } from "@/lib/missions";
-import { getDb } from "@/lib/db";
-import { completeMission } from "@/lib/business";
+import { completeMission, getDailyActivity } from "@/lib/business";
 
 export async function GET(req: NextRequest) {
   const token = req.headers.get("authorization")?.replace("Bearer ", "");
@@ -10,7 +9,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const user = getUserByToken(token);
+  const user = await getUserByToken(token);
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -19,25 +18,18 @@ export async function GET(req: NextRequest) {
   const timeWindow = getMissionTimeWindow();
   const today = new Date().toISOString().split("T")[0];
 
-  const db = getDb();
-  const activity = db
-    .prepare(
-      "SELECT morning_completed, evening_completed FROM daily_activity WHERE user_id = ? AND date = ?"
-    )
-    .get(user.id, today) as
-    | { morning_completed: number; evening_completed: number }
-    | undefined;
+  const activity = await getDailyActivity(user.id, today);
 
   return NextResponse.json({
     morning: {
       ...missions.morning,
       available: timeWindow.isMorning,
-      completed: activity?.morning_completed === 1,
+      completed: activity?.morningCompleted === true,
     },
     evening: {
       ...missions.evening,
       available: timeWindow.isEvening,
-      completed: activity?.evening_completed === 1,
+      completed: activity?.eveningCompleted === true,
     },
   });
 }
@@ -48,7 +40,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const user = getUserByToken(token);
+  const user = await getUserByToken(token);
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -75,7 +67,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const result = completeMission(user.id, missionType);
+  const result = await completeMission(user.id, missionType);
 
   return NextResponse.json(result);
 }

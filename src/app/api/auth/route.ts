@@ -24,14 +24,14 @@ export async function POST(req: NextRequest) {
   }
 
   // Try to login first
-  let user = loginUser(trimmed);
+  let user = await loginUser(trimmed);
   if (user) {
     return NextResponse.json({ user, isNew: false });
   }
 
   // Create new user
   try {
-    user = createUser(trimmed);
+    user = await createUser(trimmed);
     return NextResponse.json({ user, isNew: true });
   } catch {
     return NextResponse.json(

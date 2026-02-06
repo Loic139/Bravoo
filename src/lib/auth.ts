@@ -1,50 +1,59 @@
-import { getDb } from "./db";
+import { getDb } from "./firebase";
 import crypto from "crypto";
 
 export interface User {
-  id: number;
+  id: string;
   username: string;
   stars: number;
   rank: string;
   token: string;
-  last_active_date: string | null;
-  created_at: string;
+  lastActiveDate: string | null;
+  createdAt: string;
 }
 
-export function createUser(username: string): User {
+export async function createUser(username: string): Promise<User> {
   const db = getDb();
   const token = crypto.randomBytes(32).toString("hex");
+  const now = new Date().toISOString();
 
-  db.prepare(
-    "INSERT INTO users (username, token) VALUES (?, ?)"
-  ).run(username, token);
+  const userData = {
+    username,
+    stars: 0,
+    rank: "Bronze",
+    token,
+    lastActiveDate: null,
+    createdAt: now,
+  };
 
-  return db
-    .prepare("SELECT * FROM users WHERE username = ?")
-    .get(username) as User;
+  const docRef = await db.collection("users").add(userData);
+
+  return { id: docRef.id, ...userData };
 }
 
-export function loginUser(username: string): User | null {
+export async function loginUser(username: string): Promise<User | null> {
   const db = getDb();
-  return (
-    (db
-      .prepare("SELECT * FROM users WHERE username = ?")
-      .get(username) as User) || null
-  );
+  const snapshot = await db
+    .collection("users")
+    .where("username", "==", username)
+    .limit(1)
+    .get();
+
+  if (snapshot.empty) return null;
+
+  const doc = snapshot.docs[0];
+  return { id: doc.id, ...doc.data() } as User;
 }
 
-export function getUserByToken(token: string): User | null {
+export async function getUserByToken(token: string): Promise<User | null> {
   const db = getDb();
-  return (
-    (db
-      .prepare("SELECT * FROM users WHERE token = ?")
-      .get(token) as User) || null
-  );
-}
+  const snapshot = await db
+    .collection("users")
+    .where("token", "==", token)
+    .limit(1)
+    .get();
 
-export function getUserById(id: number): User | null {
-  const db = getDb();
-  return (
-    (db.prepare("SELECT * FROM users WHERE id = ?").get(id) as User) || null
-  );
+  if (snapshot.empty) return null;
+
+  const doc = snapshot.docs[0];
+  return { id: doc.id, ...doc.data() } as User;
 }
