@@ -2,6 +2,8 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { onAuthStateChanged, signOut } from "firebase/auth";
+import { auth } from "@/lib/firebase-client";
 import MissionCard from "@/components/MissionCard";
 import StarDisplay from "@/components/StarDisplay";
 import RankBadge from "@/components/RankBadge";
@@ -38,32 +40,34 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [showPopup, setShowPopup] = useState(false);
   const [popupStars, setPopupStars] = useState(0);
+  const [idToken, setIdToken] = useState<string | null>(null);
 
-  const getToken = () =>
-    typeof window !== "undefined"
-      ? localStorage.getItem("bravoo_token")
-      : null;
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (!firebaseUser) {
+        router.push("/login");
+        return;
+      }
+      const token = await firebaseUser.getIdToken();
+      setIdToken(token);
+    });
+    return () => unsubscribe();
+  }, [router]);
 
   const fetchData = useCallback(async () => {
-    const token = getToken();
-    if (!token) {
-      router.push("/login");
-      return;
-    }
+    if (!idToken) return;
 
     try {
       const [userRes, missionsRes] = await Promise.all([
         fetch("/api/user", {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${idToken}` },
         }),
         fetch("/api/missions", {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${idToken}` },
         }),
       ]);
 
       if (!userRes.ok || !missionsRes.ok) {
-        localStorage.removeItem("bravoo_token");
-        localStorage.removeItem("bravoo_username");
         router.push("/login");
         return;
       }
@@ -78,21 +82,20 @@ export default function Dashboard() {
     } finally {
       setLoading(false);
     }
-  }, [router]);
+  }, [idToken, router]);
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    if (idToken) fetchData();
+  }, [idToken, fetchData]);
 
   async function handleCompleteMission(type: "morning" | "evening") {
-    const token = getToken();
-    if (!token) return;
+    if (!idToken) return;
 
     const res = await fetch("/api/missions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${idToken}`,
       },
       body: JSON.stringify({ missionType: type }),
     });
@@ -107,8 +110,9 @@ export default function Dashboard() {
     }
   }
 
-  function handleLogout() {
-    localStorage.removeItem("bravoo_token");
+  async function handleLogout() {
+    await signOut(auth);
+    localStorage.removeItem("bravoo_uid");
     localStorage.removeItem("bravoo_username");
     router.push("/login");
   }

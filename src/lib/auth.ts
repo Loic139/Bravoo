@@ -1,59 +1,58 @@
 import { getDb } from "./firebase";
-import crypto from "crypto";
+import { getAuth } from "firebase-admin/auth";
+import { getApps } from "firebase-admin/app";
 
 export interface User {
   id: string;
   username: string;
   stars: number;
   rank: string;
-  token: string;
   lastActiveDate: string | null;
   createdAt: string;
 }
 
-export async function createUser(username: string): Promise<User> {
+export async function verifyIdToken(idToken: string) {
+  // Ensure Firebase is initialized
+  getDb();
+  const authAdmin = getAuth(getApps()[0]);
+  return authAdmin.verifyIdToken(idToken);
+}
+
+export async function getOrCreateUser(
+  uid: string,
+  displayName: string | undefined,
+  email: string | undefined
+): Promise<User> {
   const db = getDb();
-  const token = crypto.randomBytes(32).toString("hex");
+  const userRef = db.collection("users").doc(uid);
+  const userSnap = await userRef.get();
+
+  if (userSnap.exists) {
+    return { id: uid, ...userSnap.data() } as User;
+  }
+
+  // Create new user
+  const username = displayName || email?.split("@")[0] || "Player";
   const now = new Date().toISOString();
 
   const userData = {
     username,
     stars: 0,
     rank: "Bronze",
-    token,
     lastActiveDate: null,
     createdAt: now,
   };
 
-  const docRef = await db.collection("users").add(userData);
+  await userRef.set(userData);
 
-  return { id: docRef.id, ...userData };
+  return { id: uid, ...userData };
 }
 
-export async function loginUser(username: string): Promise<User | null> {
+export async function getUserByUid(uid: string): Promise<User | null> {
   const db = getDb();
-  const snapshot = await db
-    .collection("users")
-    .where("username", "==", username)
-    .limit(1)
-    .get();
+  const userSnap = await db.collection("users").doc(uid).get();
 
-  if (snapshot.empty) return null;
+  if (!userSnap.exists) return null;
 
-  const doc = snapshot.docs[0];
-  return { id: doc.id, ...doc.data() } as User;
-}
-
-export async function getUserByToken(token: string): Promise<User | null> {
-  const db = getDb();
-  const snapshot = await db
-    .collection("users")
-    .where("token", "==", token)
-    .limit(1)
-    .get();
-
-  if (snapshot.empty) return null;
-
-  const doc = snapshot.docs[0];
-  return { id: doc.id, ...doc.data() } as User;
+  return { id: uid, ...userSnap.data() } as User;
 }
