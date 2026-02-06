@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { auth } from "@/lib/firebase-client";
 
 interface LeaderboardEntry {
   username: string;
@@ -21,12 +22,14 @@ export default function LeaderboardPage() {
   const router = useRouter();
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
-  const currentUser =
-    typeof window !== "undefined"
-      ? localStorage.getItem("bravoo_username")
-      : null;
+  const [currentDisplayName, setCurrentDisplayName] = useState<string | null>(null);
 
   useEffect(() => {
+    const user = auth.currentUser;
+    if (user) {
+      setCurrentDisplayName(user.displayName || user.email?.split("@")[0] || null);
+    }
+
     async function fetchLeaderboard() {
       try {
         const res = await fetch("/api/leaderboard");
@@ -84,7 +87,7 @@ export default function LeaderboardPage() {
       ) : (
         <div className="space-y-2">
           {entries.map((entry, index) => {
-            const isCurrentUser = entry.username === currentUser;
+            const isCurrentUser = entry.username === currentDisplayName;
             const position = index + 1;
             const positionDisplay =
               position === 1
