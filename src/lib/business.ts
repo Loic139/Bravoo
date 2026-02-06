@@ -1,123 +1,152 @@
-import { getDb } from "./db";
+import { getDb } from "./firebase";
 import { getRank } from "./ranks";
 
-export function completeMission(
-  userId: number,
+export async function completeMission(
+  userId: string,
   missionType: "morning" | "evening"
-): { stars: number; rank: string; alreadyCompleted: boolean } {
+): Promise<{ stars: number; rank: string; alreadyCompleted: boolean }> {
   const db = getDb();
   const today = new Date().toISOString().split("T")[0];
+  const activityRef = db.collection("dailyActivity").doc(`${userId}_${today}`);
+  const userRef = db.collection("users").doc(userId);
 
-  // Ensure daily activity row exists
-  db.prepare(
-    `INSERT OR IGNORE INTO daily_activity (user_id, date, morning_completed, evening_completed) VALUES (?, ?, 0, 0)`
-  ).run(userId, today);
-
-  const column =
-    missionType === "morning" ? "morning_completed" : "evening_completed";
+  const activitySnap = await activityRef.get();
+  const field = missionType === "morning" ? "morningCompleted" : "eveningCompleted";
 
   // Check if already completed
-  const activity = db
-    .prepare(`SELECT ${column} as completed FROM daily_activity WHERE user_id = ? AND date = ?`)
-    .get(userId, today) as { completed: number } | undefined;
-
-  if (activity && activity.completed) {
-    const user = db
-      .prepare("SELECT stars, rank FROM users WHERE id = ?")
-      .get(userId) as { stars: number; rank: string };
-    return { stars: user.stars, rank: user.rank, alreadyCompleted: true };
+  if (activitySnap.exists && activitySnap.data()?.[field]) {
+    const userSnap = await userRef.get();
+    const userData = userSnap.data()!;
+    return { stars: userData.stars, rank: userData.rank, alreadyCompleted: true };
   }
 
-  // Mark mission as completed
-  db.prepare(
-    `UPDATE daily_activity SET ${column} = 1 WHERE user_id = ? AND date = ?`
-  ).run(userId, today);
-
-  // Add star
-  db.prepare("UPDATE users SET stars = MIN(stars + 1, 30), last_active_date = ? WHERE id = ?").run(
-    today,
-    userId
-  );
-
-  // Get updated user data
-  const user = db
-    .prepare("SELECT stars, rank FROM users WHERE id = ?")
-    .get(userId) as { stars: number; rank: string };
-
-  // Update rank
-  const newRank = getRank(user.stars);
-  if (newRank.name !== user.rank) {
-    db.prepare("UPDATE users SET rank = ? WHERE id = ?").run(
-      newRank.name,
-      userId
-    );
+  // Create or update daily activity
+  if (activitySnap.exists) {
+    await activityRef.update({ [field]: true });
+  } else {
+    await activityRef.set({
+      userId,
+      date: today,
+      morningCompleted: missionType === "morning",
+      eveningCompleted: missionType === "evening",
+    });
   }
+
+  // Get current user and add star
+  const userSnap = await userRef.get();
+  const userData = userSnap.data()!;
+  const newStars = Math.min(userData.stars + 1, 30);
+  const newRank = getRank(newStars);
+
+  await userRef.update({
+    stars: newStars,
+    rank: newRank.name,
+    lastActiveDate: today,
+  });
 
   // Check for legend achievement
-  if (user.stars >= 30) {
-    const month = new Date().toISOString().slice(0, 7); // "YYYY-MM"
-    db.prepare(
-      "INSERT OR IGNORE INTO legend_history (user_id, month) VALUES (?, ?)"
-    ).run(userId, month);
+  if (newStars >= 30) {
+    const month = new Date().toISOString().slice(0, 7);
+    const legendRef = db.collection("legendHistory").doc(`${userId}_${month}`);
+    const legendSnap = await legendRef.get();
+    if (!legendSnap.exists) {
+      await legendRef.set({
+        userId,
+        month,
+        achievedAt: new Date().toISOString(),
+      });
+    }
   }
 
+  return { stars: newStars, rank: newRank.name, alreadyCompleted: false };
+}
+
+export async function getDailyActivity(
+  userId: string,
+  date: string
+): Promise<{ morningCompleted: boolean; eveningCompleted: boolean } | null> {
+  const db = getDb();
+  const snap = await db.collection("dailyActivity").doc(`${userId}_${date}`).get();
+  if (!snap.exists) return null;
+  const data = snap.data()!;
   return {
-    stars: user.stars,
-    rank: newRank.name,
-    alreadyCompleted: false,
+    morningCompleted: !!data.morningCompleted,
+    eveningCompleted: !!data.eveningCompleted,
   };
 }
 
-export function processDailyCheck() {
+export async function processDailyCheck(): Promise<number> {
   const db = getDb();
   const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
   const yesterdayStr = yesterday.toISOString().split("T")[0];
 
-  // Find users who were active before but had no activity yesterday
-  const usersToDeduct = db
-    .prepare(
-      `SELECT u.id FROM users u
-       WHERE u.last_active_date IS NOT NULL
-       AND u.stars > 0
-       AND NOT EXISTS (
-         SELECT 1 FROM daily_activity da
-         WHERE da.user_id = u.id
-         AND da.date = ?
-         AND (da.morning_completed = 1 OR da.evening_completed = 1)
-       )`
-    )
-    .all(yesterdayStr) as { id: number }[];
+  // Find all users with stars > 0 who have been active before
+  const usersSnap = await db
+    .collection("users")
+    .where("stars", ">", 0)
+    .get();
 
-  for (const user of usersToDeduct) {
-    db.prepare(
-      "UPDATE users SET stars = MAX(stars - 1, 0) WHERE id = ?"
-    ).run(user.id);
+  let deductions = 0;
 
-    // Update rank after deduction
-    const updated = db
-      .prepare("SELECT stars FROM users WHERE id = ?")
-      .get(user.id) as { stars: number };
-    const newRank = getRank(updated.stars);
-    db.prepare("UPDATE users SET rank = ? WHERE id = ?").run(
-      newRank.name,
-      user.id
-    );
+  for (const userDoc of usersSnap.docs) {
+    const userData = userDoc.data();
+    if (!userData.lastActiveDate) continue;
+
+    // Check if they had any activity yesterday
+    const activityRef = db.collection("dailyActivity").doc(`${userDoc.id}_${yesterdayStr}`);
+    const activitySnap = await activityRef.get();
+
+    const hadActivity =
+      activitySnap.exists &&
+      (activitySnap.data()?.morningCompleted || activitySnap.data()?.eveningCompleted);
+
+    if (!hadActivity) {
+      const newStars = Math.max(userData.stars - 1, 0);
+      const newRank = getRank(newStars);
+      await userDoc.ref.update({ stars: newStars, rank: newRank.name });
+      deductions++;
+    }
   }
 
-  return usersToDeduct.length;
+  return deductions;
 }
 
-export function processMonthlyReset() {
-  const db = getDb();
+export async function processMonthlyReset(): Promise<number> {
   const today = new Date();
-
-  // Only reset on the 1st of the month
   if (today.getDate() !== 1) return 0;
 
-  const result = db
-    .prepare("UPDATE users SET stars = 0, rank = 'Bronze'")
-    .run();
+  const db = getDb();
+  const usersSnap = await db.collection("users").get();
 
-  return result.changes;
+  const batch = db.batch();
+  let count = 0;
+
+  for (const doc of usersSnap.docs) {
+    batch.update(doc.ref, { stars: 0, rank: "Bronze" });
+    count++;
+  }
+
+  if (count > 0) await batch.commit();
+  return count;
+}
+
+export async function getLeaderboard(): Promise<
+  { username: string; stars: number; rank: string }[]
+> {
+  const db = getDb();
+  const snapshot = await db
+    .collection("users")
+    .orderBy("stars", "desc")
+    .limit(50)
+    .get();
+
+  return snapshot.docs.map((doc) => {
+    const data = doc.data();
+    return {
+      username: data.username,
+      stars: data.stars,
+      rank: data.rank,
+    };
+  });
 }
