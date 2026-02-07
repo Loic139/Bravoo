@@ -8,12 +8,8 @@ interface RankBadgeProps {
 
 export default function RankBadge({ rank, emoji, color }: RankBadgeProps) {
   return (
-    <span
-      className="inline-flex items-center gap-1 text-xs font-semibold"
-      style={{ color }}
-    >
-      <span>{emoji}</span>
-      {rank}
+    <span className="inline-flex items-center gap-1 text-xs font-semibold" style={{ color }}>
+      {emoji} {rank}
     </span>
   );
 }
