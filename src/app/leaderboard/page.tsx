@@ -3,10 +3,12 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { auth } from "@/lib/firebase-client";
+import { detectLocale, t as translate, Locale } from "@/lib/i18n";
 
 interface LeaderboardEntry {
   username: string;
   stars: number;
+  gold: number;
   rank: string;
 }
 
@@ -20,11 +22,16 @@ const RANK_EMOJIS: Record<string, string> = {
 
 export default function LeaderboardPage() {
   const router = useRouter();
+  const [locale, setLocale] = useState<Locale>("en");
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentDisplayName, setCurrentDisplayName] = useState<string | null>(null);
 
+  const tt = (key: string, params?: Record<string, string | number>) =>
+    translate(key, locale, params);
+
   useEffect(() => {
+    setLocale(detectLocale());
     const user = auth.currentUser;
     if (user) {
       setCurrentDisplayName(user.displayName || user.email?.split("@")[0] || null);
@@ -47,7 +54,7 @@ export default function LeaderboardPage() {
   }, []);
 
   return (
-    <div className="p-4 pb-8 space-y-4">
+    <div className="p-4 pb-8 space-y-4 max-w-lg mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between pt-2">
         <button
@@ -55,17 +62,17 @@ export default function LeaderboardPage() {
           className="text-sm font-medium px-3 py-1 rounded-lg"
           style={{ color: "var(--color-text-muted)" }}
         >
-          &larr; Back
+          &larr; {tt("leaderboard.back")}
         </button>
         <h1 className="text-xl font-black" style={{ color: "var(--color-primary)" }}>
-          Leaderboard
+          {tt("leaderboard.title")}
         </h1>
         <div className="w-16" />
       </div>
 
       <p className="text-center text-sm" style={{ color: "var(--color-text-muted)" }}>
-        Monthly ranking &mdash;{" "}
-        {new Date().toLocaleString("default", {
+        {tt("leaderboard.monthly")} &mdash;{" "}
+        {new Date().toLocaleString(locale === "fr" ? "fr-FR" : "en-US", {
           month: "long",
           year: "numeric",
         })}
@@ -74,14 +81,14 @@ export default function LeaderboardPage() {
       {loading ? (
         <div className="text-center py-12">
           <div className="text-4xl mb-4 animate-pulse-gentle">🏆</div>
-          <p style={{ color: "var(--color-text-muted)" }}>Loading...</p>
+          <p style={{ color: "var(--color-text-muted)" }}>{tt("app.loading")}</p>
         </div>
       ) : entries.length === 0 ? (
         <div className="text-center py-12 card">
           <p className="text-4xl mb-4">🌟</p>
-          <p className="font-bold">No entries yet</p>
+          <p className="font-bold">{tt("leaderboard.no_entries")}</p>
           <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
-            Complete missions to appear here!
+            {tt("leaderboard.no_entries_sub")}
           </p>
         </div>
       ) : (
@@ -125,24 +132,32 @@ export default function LeaderboardPage() {
                         className="text-xs ml-2"
                         style={{ color: "var(--color-primary)" }}
                       >
-                        (you)
+                        {tt("leaderboard.you")}
                       </span>
                     )}
                   </p>
                   <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>
-                    {RANK_EMOJIS[entry.rank] || ""} {entry.rank}
+                    {RANK_EMOJIS[entry.rank] || ""} {tt(`rank.${entry.rank}`)}
                   </p>
                 </div>
                 <div className="text-right">
-                  <span
-                    className="text-xl font-black"
-                    style={{ color: "var(--color-star)" }}
-                  >
-                    {entry.stars}
-                  </span>
-                  <span className="text-xs ml-1" style={{ color: "var(--color-text-muted)" }}>
-                    ⭐
-                  </span>
+                  <div className="flex items-center gap-1">
+                    <span
+                      className="text-xl font-black"
+                      style={{ color: "var(--color-star)" }}
+                    >
+                      {entry.stars}
+                    </span>
+                    <span className="text-xs" style={{ color: "var(--color-text-muted)" }}>
+                      ⭐
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1 justify-end">
+                    <span className="text-xs">🪙</span>
+                    <span className="text-xs font-bold" style={{ color: "var(--color-star)" }}>
+                      {entry.gold}
+                    </span>
+                  </div>
                 </div>
               </div>
             );

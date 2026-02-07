@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyIdToken, getUserByUid } from "@/lib/auth";
-import { getRank, getRemainingDays } from "@/lib/ranks";
+import { getRank, getRemainingDays, MAX_STARS } from "@/lib/ranks";
 
 export async function GET(req: NextRequest) {
   const idToken = req.headers.get("authorization")?.replace("Bearer ", "");
@@ -23,11 +23,12 @@ export async function GET(req: NextRequest) {
       id: user.id,
       username: user.username,
       stars: user.stars,
+      gold: user.gold || 0,
       rank: rankInfo.name,
       rankEmoji: rankInfo.emoji,
       rankColor: rankInfo.color,
       remainingDays,
-      starsToLegend: Math.max(0, 30 - user.stars),
+      starsToLegend: Math.max(0, MAX_STARS - user.stars),
     });
   } catch {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
