@@ -1,5 +1,7 @@
 "use client";
 
+import { motion } from "framer-motion";
+
 interface StarDisplayProps {
   stars: number;
   maxStars?: number;
@@ -10,43 +12,41 @@ interface StarDisplayProps {
 }
 
 export default function StarDisplay({
-  stars,
-  maxStars = 4,
-  goalText,
-  reachedText,
-  remainingText,
-  starsLabel,
+  stars, maxStars = 4, goalText, reachedText, remainingText, starsLabel,
 }: StarDisplayProps) {
-  const starIcons = Array.from({ length: maxStars }, (_, i) => i < stars);
-
   return (
-    <div className="card">
+    <div
+      className="rounded-2xl p-4 border"
+      style={{ background: "white", borderColor: "var(--border)" }}
+    >
       <div className="flex items-center justify-between mb-3">
-        <span className="text-sm font-bold" style={{ color: "var(--color-text-muted)" }}>
+        <span className="text-xs font-semibold" style={{ color: "var(--text-secondary)" }}>
           {starsLabel}
         </span>
-        <span className="text-xs" style={{ color: "var(--color-text-muted)" }}>
+        <span className="text-[10px] font-medium" style={{ color: "var(--text-muted)" }}>
           {goalText}
         </span>
       </div>
 
-      {/* Star icons row */}
       <div className="flex items-center justify-center gap-3 mb-3">
-        {starIcons.map((filled, i) => (
-          <div
+        {Array.from({ length: maxStars }, (_, i) => (
+          <motion.div
             key={i}
-            className={`text-3xl ${filled ? "animate-star-bounce" : ""}`}
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: i * 0.1, type: "spring", stiffness: 300, damping: 15 }}
+            className="w-12 h-12 rounded-2xl flex items-center justify-center text-xl"
             style={{
-              opacity: filled ? 1 : 0.2,
-              animationDelay: `${i * 0.1}s`,
+              background: i < stars ? "#FEF3C7" : "var(--bg)",
+              opacity: i < stars ? 1 : 0.4,
             }}
           >
             ⭐
-          </div>
+          </motion.div>
         ))}
       </div>
 
-      <p className="text-xs text-center" style={{ color: "var(--color-text-muted)" }}>
+      <p className="text-[11px] text-center font-medium" style={{ color: "var(--text-muted)" }}>
         {stars >= maxStars ? reachedText : remainingText}
       </p>
     </div>

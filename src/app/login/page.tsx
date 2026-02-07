@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { signInWithPopup } from "firebase/auth";
 import { auth, googleProvider } from "@/lib/firebase-client";
 import { detectLocale, t as translate, Locale } from "@/lib/i18n";
+import { motion } from "framer-motion";
+import { Loader2 } from "lucide-react";
 
 export default function LoginPage() {
   const [error, setError] = useState("");
@@ -22,30 +24,24 @@ export default function LoginPage() {
   async function handleGoogleLogin() {
     setError("");
     setLoading(true);
-
     try {
       const result = await signInWithPopup(auth, googleProvider);
       const idToken = await result.user.getIdToken();
-
       const res = await fetch("/api/auth", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ idToken }),
       });
-
       const contentType = res.headers.get("content-type") || "";
       if (!contentType.includes("application/json")) {
         setError(tt("error.server", { status: res.status }));
         return;
       }
-
       const data = await res.json();
-
       if (!res.ok) {
         setError(data.error || "Something went wrong");
         return;
       }
-
       localStorage.setItem("bravoo_uid", data.user.id);
       localStorage.setItem("bravoo_username", data.user.username);
       router.push("/");
@@ -64,87 +60,100 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-dvh p-6">
-      <div className="animate-slide-up w-full max-w-sm">
-        <div className="text-center mb-10">
-          <h1 className="text-5xl font-black mb-2">
-            <span style={{ color: "var(--color-primary)" }}>Bravoo</span>
+    <div className="flex flex-col items-center justify-center min-h-dvh px-6" style={{ background: "white" }}>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="w-full max-w-sm"
+      >
+        {/* Logo */}
+        <div className="text-center mb-14">
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+            className="inline-flex items-center justify-center w-20 h-20 rounded-[22px] mb-6 text-white text-3xl font-black"
+            style={{ background: "var(--accent)", boxShadow: "0 12px 40px rgba(255, 107, 53, 0.35)" }}
+          >
+            B
+          </motion.div>
+          <h1
+            className="text-4xl font-black tracking-tight mb-2"
+            style={{ letterSpacing: "-0.04em" }}
+          >
+            Bravoo
           </h1>
-          <p className="text-lg" style={{ color: "var(--color-text-muted)" }}>
+          <p className="text-[15px]" style={{ color: "var(--text-secondary)" }}>
             {tt("app.tagline")}
           </p>
         </div>
 
-        <div className="w-full space-y-4">
-          {error && (
-            <p className="text-red-400 text-sm text-center">{error}</p>
-          )}
-
-          <button
-            onClick={handleGoogleLogin}
-            disabled={loading}
-            className="btn-primary text-lg flex items-center justify-center gap-3"
+        {/* Error */}
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            className="mb-4 text-center text-sm py-3 px-4 rounded-2xl"
+            style={{ background: "#FEF2F2", color: "#DC2626" }}
           >
+            {error}
+          </motion.div>
+        )}
+
+        {/* Google Button */}
+        <button
+          onClick={handleGoogleLogin}
+          disabled={loading}
+          className="flex items-center justify-center gap-3 w-full py-3.5 px-6 rounded-2xl font-semibold text-[15px] transition-all duration-200 hover:shadow-lg active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+          style={{
+            background: "white",
+            color: "var(--text)",
+            border: "1.5px solid var(--border)",
+            boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
+          }}
+        >
+          {loading ? (
+            <Loader2 className="w-5 h-5 animate-spin" style={{ color: "var(--text-muted)" }} />
+          ) : (
             <svg width="20" height="20" viewBox="0 0 24 24">
-              <path
-                fill="currentColor"
-                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
-              />
-              <path
-                fill="currentColor"
-                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-              />
-              <path
-                fill="currentColor"
-                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-              />
-              <path
-                fill="currentColor"
-                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-              />
+              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" />
+              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
             </svg>
-            {loading ? tt("app.login.signing_in") : tt("app.login.button")}
-          </button>
-        </div>
+          )}
+          {loading ? tt("app.login.signing_in") : tt("app.login.button")}
+        </button>
 
         <p
-          className="text-center text-sm mt-6 whitespace-pre-line"
-          style={{ color: "var(--color-text-muted)" }}
+          className="text-center text-[13px] mt-8 whitespace-pre-line leading-relaxed"
+          style={{ color: "var(--text-muted)" }}
         >
           {tt("app.login.subtitle")}
         </p>
 
-        {/* Language toggle */}
-        <div className="flex items-center justify-center gap-3 mt-6">
-          <button
-            onClick={() => setLocale("en")}
-            className={`text-sm px-3 py-1 rounded-full ${locale === "en" ? "font-bold" : ""}`}
-            style={{
-              background: locale === "en" ? "rgba(255, 107, 53, 0.15)" : "transparent",
-              color: locale === "en" ? "var(--color-primary)" : "var(--color-text-muted)",
-            }}
-          >
-            EN
-          </button>
-          <button
-            onClick={() => setLocale("fr")}
-            className={`text-sm px-3 py-1 rounded-full ${locale === "fr" ? "font-bold" : ""}`}
-            style={{
-              background: locale === "fr" ? "rgba(255, 107, 53, 0.15)" : "transparent",
-              color: locale === "fr" ? "var(--color-primary)" : "var(--color-text-muted)",
-            }}
-          >
-            FR
-          </button>
+        {/* Language */}
+        <div className="flex items-center justify-center gap-1 mt-8">
+          {(["en", "fr"] as Locale[]).map((l) => (
+            <button
+              key={l}
+              onClick={() => setLocale(l)}
+              className="text-xs px-4 py-1.5 rounded-full font-medium transition-all duration-200"
+              style={{
+                background: locale === l ? "var(--text)" : "transparent",
+                color: locale === l ? "white" : "var(--text-muted)",
+              }}
+            >
+              {l.toUpperCase()}
+            </button>
+          ))}
         </div>
 
-        <p
-          className="text-center text-xs mt-6"
-          style={{ color: "var(--color-text-muted)", opacity: 0.4 }}
-        >
+        <p className="text-center text-[11px] mt-8" style={{ color: "var(--text-muted)", opacity: 0.5 }}>
           {tt("app.version")}
         </p>
-      </div>
+      </motion.div>
     </div>
   );
 }

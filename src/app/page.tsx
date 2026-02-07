@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase-client";
 import { detectLocale, t as translate, Locale } from "@/lib/i18n";
+import { motion } from "framer-motion";
+import { LogOut, Trophy, Star, Coins, CalendarDays, Loader2 } from "lucide-react";
 import QuestCard from "@/components/QuestCard";
 import EmptySlot from "@/components/EmptySlot";
 import StarDisplay from "@/components/StarDisplay";
@@ -13,35 +15,17 @@ import CompletionPopup from "@/components/CompletionPopup";
 import { MAX_STARS } from "@/lib/ranks";
 
 interface UserData {
-  username: string;
-  stars: number;
-  gold: number;
-  rank: string;
-  rankEmoji: string;
-  rankColor: string;
-  remainingDays: number;
-  starsToLegend: number;
+  username: string; stars: number; gold: number; rank: string;
+  rankEmoji: string; rankColor: string; remainingDays: number; starsToLegend: number;
 }
-
 interface QuestData {
-  id: string;
-  slot: number;
-  type: "daily" | "weekly";
-  templateId: string;
-  titleKey: string;
-  descriptionKey: string;
-  emoji: string;
-  goldReward: number;
-  completed: boolean;
-  rerolled: boolean;
+  id: string; slot: number; type: "daily" | "weekly"; templateId: string;
+  titleKey: string; descriptionKey: string; emoji: string;
+  goldReward: number; completed: boolean; rerolled: boolean;
 }
-
 interface WeeklyProgress {
-  weeklyCompleted: number;
-  weeklyTotal: number;
-  dailyCompleted: number;
-  dailyTotal: number;
-  starAwarded: boolean;
+  weeklyCompleted: number; weeklyTotal: number;
+  dailyCompleted: number; dailyTotal: number; starAwarded: boolean;
 }
 
 const MAX_SLOTS = 4;
@@ -58,97 +42,59 @@ export default function Dashboard() {
   const [popupStars, setPopupStars] = useState(0);
   const [idToken, setIdToken] = useState<string | null>(null);
 
-  const tt = useCallback((key: string, params?: Record<string, string | number>) => {
-    return translate(key, locale, params);
-  }, [locale]);
+  const tt = useCallback((key: string, params?: Record<string, string | number>) =>
+    translate(key, locale, params), [locale]);
+
+  useEffect(() => { setLocale(detectLocale()); }, []);
 
   useEffect(() => {
-    setLocale(detectLocale());
-  }, []);
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (!firebaseUser) {
-        router.push("/login");
-        return;
-      }
-      const token = await firebaseUser.getIdToken();
-      setIdToken(token);
+    const unsub = onAuthStateChanged(auth, async (u) => {
+      if (!u) { router.push("/login"); return; }
+      setIdToken(await u.getIdToken());
     });
-    return () => unsubscribe();
+    return () => unsub();
   }, [router]);
 
   const fetchData = useCallback(async () => {
     if (!idToken) return;
-
     try {
       const [userRes, questsRes] = await Promise.all([
-        fetch("/api/user", {
-          headers: { Authorization: `Bearer ${idToken}` },
-        }),
-        fetch("/api/quests", {
-          headers: { Authorization: `Bearer ${idToken}` },
-        }),
+        fetch("/api/user", { headers: { Authorization: `Bearer ${idToken}` } }),
+        fetch("/api/quests", { headers: { Authorization: `Bearer ${idToken}` } }),
       ]);
-
-      if (!userRes.ok || !questsRes.ok) {
-        router.push("/login");
-        return;
-      }
-
+      if (!userRes.ok || !questsRes.ok) { router.push("/login"); return; }
       const userData = await userRes.json();
       const questsData = await questsRes.json();
-
       setUser(userData);
       setQuests(questsData.quests || []);
       setProgress(questsData.progress || null);
-    } catch {
-      // Network error, stay on page
-    } finally {
-      setLoading(false);
-    }
+    } catch { /* */ } finally { setLoading(false); }
   }, [idToken, router]);
 
-  useEffect(() => {
-    if (idToken) fetchData();
-  }, [idToken, fetchData]);
+  useEffect(() => { if (idToken) fetchData(); }, [idToken, fetchData]);
 
-  async function handleCompleteQuest(questId: string) {
+  async function handleComplete(questId: string) {
     if (!idToken) return;
-
     const res = await fetch("/api/quests/complete", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${idToken}`,
-      },
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${idToken}` },
       body: JSON.stringify({ questId }),
     });
-
     if (res.ok) {
-      const result = await res.json();
-      setPopupGold(result.goldEarned);
-      setPopupStars(result.stars);
-      setShowPopup(true);
+      const r = await res.json();
+      setPopupGold(r.goldEarned); setPopupStars(r.stars); setShowPopup(true);
       await fetchData();
     }
   }
 
-  async function handleRerollQuest(questId: string) {
+  async function handleReroll(questId: string) {
     if (!idToken) return;
-
     const res = await fetch("/api/quests/reroll", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${idToken}`,
-      },
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${idToken}` },
       body: JSON.stringify({ questId }),
     });
-
-    if (res.ok) {
-      await fetchData();
-    }
+    if (res.ok) await fetchData();
   }
 
   async function handleLogout() {
@@ -161,152 +107,140 @@ export default function Dashboard() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-dvh">
-        <div className="text-center">
-          <div className="text-4xl mb-4 animate-pulse-gentle">⭐</div>
-          <p style={{ color: "var(--color-text-muted)" }}>{tt("app.loading")}</p>
-        </div>
+        <Loader2 className="w-8 h-8 animate-spin" style={{ color: "var(--text-muted)" }} />
       </div>
     );
   }
 
   if (!user) return null;
 
-  // Build 4 slots: fill with quests or show empty
-  const slotContents: (QuestData | null)[] = Array.from({ length: MAX_SLOTS }, (_, i) => {
-    return quests.find((q) => q.slot === i) || null;
-  });
-
-  const weeklyDone = progress ? progress.weeklyCompleted : 0;
-  const weeklyTotal = progress ? progress.weeklyTotal : 0;
-  const dailyDone = progress ? progress.dailyCompleted : 0;
-  const dailyTotal = progress ? progress.dailyTotal : 0;
+  const slots: (QuestData | null)[] = Array.from({ length: MAX_SLOTS }, (_, i) =>
+    quests.find((q) => q.slot === i) || null
+  );
+  const totalDone = (progress?.weeklyCompleted || 0) + (progress?.dailyCompleted || 0);
+  const totalAll = (progress?.weeklyTotal || 0) + (progress?.dailyTotal || 0);
+  const pct = totalAll > 0 ? (totalDone / totalAll) * 100 : 0;
 
   return (
-    <div className="p-4 pb-8 space-y-4 max-w-lg mx-auto">
+    <div className="pb-8 max-w-lg mx-auto">
       {/* Header */}
-      <div className="flex items-center justify-between pt-2">
-        <div>
-          <h1 className="text-2xl font-black" style={{ color: "var(--color-primary)" }}>
-            Bravoo
-          </h1>
+      <div className="flex items-center justify-between px-5 pt-4 pb-2">
+        <div className="flex items-center gap-3">
+          <div
+            className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm"
+            style={{ background: "var(--accent)" }}
+          >
+            {user.username.charAt(0).toUpperCase()}
+          </div>
+          <div>
+            <p className="text-sm font-semibold">{user.username}</p>
+            <RankBadge rank={tt(`rank.${user.rank}`)} emoji={user.rankEmoji} color={user.rankColor} />
+          </div>
         </div>
         <button
           onClick={handleLogout}
-          className="text-sm font-medium px-3 py-1 rounded-lg"
-          style={{ color: "var(--color-text-muted)" }}
+          className="p-2 rounded-xl transition-colors hover:bg-gray-100"
+          title={tt("app.logout")}
         >
-          {tt("app.logout")}
+          <LogOut className="w-4.5 h-4.5" style={{ color: "var(--text-muted)" }} />
         </button>
       </div>
 
-      {/* User Info + Gold */}
-      <div className="card">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-lg font-bold">{user.username}</p>
-            <RankBadge
-              rank={tt(`rank.${user.rank}`)}
-              emoji={user.rankEmoji}
-              color={user.rankColor}
-            />
+      {/* Stats row */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+        className="flex gap-3 px-5 mt-2 mb-4"
+      >
+        {[
+          { icon: <Star className="w-4 h-4" style={{ color: "var(--star)" }} />, value: user.stars, label: tt("dashboard.stars_progress") },
+          { icon: <Coins className="w-4 h-4" style={{ color: "var(--gold)" }} />, value: user.gold, label: tt("dashboard.gold") },
+          { icon: <CalendarDays className="w-4 h-4" style={{ color: "var(--text-muted)" }} />, value: user.remainingDays, label: tt("dashboard.days_left") },
+        ].map((s, i) => (
+          <div
+            key={i}
+            className="flex-1 flex flex-col items-center gap-1 py-3 rounded-2xl border"
+            style={{ background: "white", borderColor: "var(--border)" }}
+          >
+            {s.icon}
+            <span className="text-xl font-extrabold">{s.value}</span>
+            <span className="text-[10px] font-medium" style={{ color: "var(--text-muted)" }}>{s.label}</span>
           </div>
-          <div className="text-right space-y-1">
-            <div className="flex items-center justify-end gap-1">
-              <span className="text-lg">🪙</span>
-              <span className="text-xl font-black" style={{ color: "var(--color-star)" }}>
-                {user.gold}
-              </span>
-            </div>
-            <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>
-              {tt("dashboard.days_left")}: {user.remainingDays}
-            </p>
-          </div>
-        </div>
+        ))}
+      </motion.div>
+
+      {/* Stars */}
+      <div className="px-5 mb-4">
+        <StarDisplay
+          stars={user.stars} maxStars={MAX_STARS}
+          starsLabel={`${user.stars} / ${MAX_STARS} ⭐`}
+          goalText={tt("dashboard.stars_goal")}
+          reachedText={tt("dashboard.stars_reached")}
+          remainingText={tt("dashboard.stars_remaining", { count: MAX_STARS - user.stars })}
+        />
       </div>
 
-      {/* Stars Progress */}
-      <StarDisplay
-        stars={user.stars}
-        maxStars={MAX_STARS}
-        starsLabel={`${user.stars} / ${MAX_STARS} ⭐`}
-        goalText={tt("dashboard.stars_goal")}
-        reachedText={tt("dashboard.stars_reached")}
-        remainingText={tt("dashboard.stars_remaining", { count: MAX_STARS - user.stars })}
-      />
-
-      {/* Weekly Progress Bar */}
+      {/* Progress bar */}
       {progress && (
-        <div className="card" style={{ padding: "1rem 1.5rem" }}>
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold" style={{ color: "var(--color-text-muted)" }}>
-              {tt("quests.weekly_progress", {
-                completed: weeklyDone + dailyDone,
-                total: weeklyTotal + dailyTotal,
-              })}
-            </span>
-            {progress.starAwarded && (
-              <span className="text-xs font-bold" style={{ color: "var(--color-success)" }}>
-                {tt("quests.star_earned")}
+        <div className="px-5 mb-5">
+          <div className="rounded-2xl p-4 border" style={{ background: "white", borderColor: "var(--border)" }}>
+            <div className="flex items-center justify-between mb-2.5">
+              <span className="text-xs font-semibold" style={{ color: "var(--text-secondary)" }}>
+                {tt("quests.weekly_progress", { completed: totalDone, total: totalAll })}
               </span>
-            )}
-          </div>
-          <div className="progress-bar">
-            <div
-              className="progress-bar-fill"
-              style={{
-                width: `${weeklyTotal + dailyTotal > 0
-                  ? ((weeklyDone + dailyDone) / (weeklyTotal + dailyTotal)) * 100
-                  : 0}%`,
-              }}
-            />
+              {progress.starAwarded && (
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                  style={{ background: "rgba(16,185,129,0.1)", color: "var(--success)" }}>
+                  {tt("quests.star_earned")}
+                </span>
+              )}
+            </div>
+            <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: `${pct}%` }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+                className="h-full rounded-full"
+                style={{ background: "linear-gradient(90deg, var(--accent), var(--star))" }}
+              />
+            </div>
           </div>
         </div>
       )}
 
-      {/* Quest Slots */}
-      <div className="space-y-3">
-        {slotContents.map((quest, slotIndex) =>
-          quest ? (
+      {/* Quests */}
+      <div className="px-5 space-y-3 mb-5">
+        {slots.map((q, i) =>
+          q ? (
             <QuestCard
-              key={quest.id}
-              id={quest.id}
-              type={quest.type}
-              title={tt(quest.titleKey)}
-              description={tt(quest.descriptionKey)}
-              emoji={quest.emoji}
-              goldReward={quest.goldReward}
-              completed={quest.completed}
-              rerolled={quest.rerolled}
-              onComplete={handleCompleteQuest}
-              onReroll={handleRerollQuest}
-              t={tt}
+              key={q.id} id={q.id} type={q.type}
+              title={tt(q.titleKey)} description={tt(q.descriptionKey)}
+              emoji={q.emoji} goldReward={q.goldReward}
+              completed={q.completed} rerolled={q.rerolled}
+              onComplete={handleComplete} onReroll={handleReroll} t={tt}
             />
           ) : (
-            <EmptySlot
-              key={`empty-${slotIndex}`}
-              message={tt("quests.empty_slot")}
-            />
+            <EmptySlot key={`e-${i}`} message={tt("quests.empty_slot")} />
           )
         )}
       </div>
 
-      {/* Leaderboard Link */}
-      <button
-        onClick={() => router.push("/leaderboard")}
-        className="btn-secondary flex items-center justify-center gap-2"
-      >
-        <span>🏆</span>
-        {tt("dashboard.leaderboard")}
-      </button>
+      {/* Leaderboard */}
+      <div className="px-5">
+        <button
+          onClick={() => router.push("/leaderboard")}
+          className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl border text-sm font-semibold transition-all hover:bg-gray-50"
+          style={{ background: "white", borderColor: "var(--border)", color: "var(--text)" }}
+        >
+          <Trophy className="w-4 h-4" style={{ color: "var(--star)" }} />
+          {tt("dashboard.leaderboard")}
+        </button>
+      </div>
 
-      {/* Completion Popup */}
       <CompletionPopup
-        visible={showPopup}
-        goldEarned={popupGold}
-        stars={popupStars}
-        locale={locale}
-        t={tt}
-        onClose={() => setShowPopup(false)}
+        visible={showPopup} goldEarned={popupGold} stars={popupStars}
+        locale={locale} t={tt} onClose={() => setShowPopup(false)}
       />
     </div>
   );

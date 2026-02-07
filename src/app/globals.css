@@ -1,165 +1,35 @@
 @import "tailwindcss";
 
 :root {
-  --color-primary: #FF6B35;
-  --color-primary-dark: #E55A2B;
-  --color-bg: #0F172A;
-  --color-card: #1E293B;
-  --color-text: #F8FAFC;
-  --color-text-muted: #94A3B8;
-  --color-star: #FBBF24;
-  --color-success: #22C55E;
+  --bg: #F7F7F8;
+  --card: #FFFFFF;
+  --text: #111827;
+  --text-secondary: #6B7280;
+  --text-muted: #9CA3AF;
+  --border: #E5E7EB;
+  --accent: #FF6B35;
+  --accent-hover: #E8582A;
+  --success: #10B981;
+  --star: #F59E0B;
+  --gold: #B8860B;
+  --weekly: #7C3AED;
+  --daily: #2563EB;
+  --ring: rgba(255, 107, 53, 0.3);
 }
 
 body {
-  background: var(--color-bg);
-  color: var(--color-text);
-  font-family: system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", system-ui, sans-serif;
   min-height: 100dvh;
-}
-
-@keyframes starBounce {
-  0% { transform: scale(0); opacity: 0; }
-  50% { transform: scale(1.4); }
-  100% { transform: scale(1); opacity: 1; }
-}
-
-@keyframes slideUp {
-  from { transform: translateY(20px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
-
-@keyframes pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.05); }
+  -webkit-font-smoothing: antialiased;
 }
 
 @keyframes confetti {
   0% { transform: translateY(0) rotate(0deg); opacity: 1; }
-  100% { transform: translateY(-100px) rotate(720deg); opacity: 0; }
-}
-
-.animate-star-bounce {
-  animation: starBounce 0.5s ease-out forwards;
-}
-
-.animate-slide-up {
-  animation: slideUp 0.4s ease-out forwards;
-}
-
-.animate-pulse-gentle {
-  animation: pulse 2s ease-in-out infinite;
+  100% { transform: translateY(-120px) rotate(720deg); opacity: 0; }
 }
 
 .animate-confetti {
   animation: confetti 1s ease-out forwards;
-}
-
-.star-fill {
-  background: linear-gradient(135deg, #FBBF24, #F59E0B);
-}
-
-.card {
-  background: var(--color-card);
-  border-radius: 16px;
-  padding: 1.5rem;
-}
-
-.btn-primary {
-  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
-  color: white;
-  border: none;
-  border-radius: 12px;
-  padding: 0.875rem 1.5rem;
-  font-weight: 700;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: transform 0.15s, box-shadow 0.15s;
-  width: 100%;
-}
-
-.btn-primary:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 20px rgba(255, 107, 53, 0.4);
-}
-
-.btn-primary:active:not(:disabled) {
-  transform: translateY(0);
-}
-
-.btn-primary:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.btn-secondary {
-  background: transparent;
-  color: var(--color-text-muted);
-  border: 1px solid rgba(148, 163, 184, 0.3);
-  border-radius: 12px;
-  padding: 0.875rem 1.5rem;
-  font-weight: 600;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background 0.15s;
-  width: 100%;
-}
-
-.btn-secondary:hover {
-  background: rgba(148, 163, 184, 0.1);
-}
-
-.progress-bar {
-  height: 8px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 999px;
-  overflow: hidden;
-}
-
-.progress-bar-fill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--color-primary), var(--color-star));
-  border-radius: 999px;
-  transition: width 0.6s ease-out;
-}
-
-/* Quest Card */
-.quest-card {
-  background: var(--color-card);
-  border-radius: 16px;
-  padding: 1rem 1.25rem;
-  transition: transform 0.15s;
-}
-
-.quest-card:not(.quest-empty-slot):hover {
-  transform: translateY(-1px);
-}
-
-.quest-empty-slot {
-  opacity: 0.4;
-  border: 2px dashed rgba(148, 163, 184, 0.2);
-  background: transparent;
-}
-
-.quest-reroll-btn {
-  background: rgba(148, 163, 184, 0.1);
-  border: 1px solid rgba(148, 163, 184, 0.2);
-  border-radius: 12px;
-  padding: 0 0.75rem;
-  font-size: 1.1rem;
-  cursor: pointer;
-  transition: background 0.15s, transform 0.15s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.quest-reroll-btn:hover:not(:disabled) {
-  background: rgba(148, 163, 184, 0.2);
-  transform: rotate(180deg);
-}
-
-.quest-reroll-btn:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
 }
