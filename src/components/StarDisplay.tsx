@@ -3,28 +3,51 @@
 interface StarDisplayProps {
   stars: number;
   maxStars?: number;
+  goalText: string;
+  reachedText: string;
+  remainingText: string;
+  starsLabel: string;
 }
 
-export default function StarDisplay({ stars, maxStars = 30 }: StarDisplayProps) {
-  const percentage = Math.min((stars / maxStars) * 100, 100);
+export default function StarDisplay({
+  stars,
+  maxStars = 4,
+  goalText,
+  reachedText,
+  remainingText,
+  starsLabel,
+}: StarDisplayProps) {
+  const starIcons = Array.from({ length: maxStars }, (_, i) => i < stars);
 
   return (
     <div className="card">
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-3xl font-black" style={{ color: "var(--color-star)" }}>
-          {stars}
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-sm font-bold" style={{ color: "var(--color-text-muted)" }}>
+          {starsLabel}
         </span>
-        <span className="text-sm font-medium" style={{ color: "var(--color-text-muted)" }}>
-          / {maxStars} stars
+        <span className="text-xs" style={{ color: "var(--color-text-muted)" }}>
+          {goalText}
         </span>
       </div>
-      <div className="progress-bar">
-        <div className="progress-bar-fill" style={{ width: `${percentage}%` }} />
+
+      {/* Star icons row */}
+      <div className="flex items-center justify-center gap-3 mb-3">
+        {starIcons.map((filled, i) => (
+          <div
+            key={i}
+            className={`text-3xl ${filled ? "animate-star-bounce" : ""}`}
+            style={{
+              opacity: filled ? 1 : 0.2,
+              animationDelay: `${i * 0.1}s`,
+            }}
+          >
+            ⭐
+          </div>
+        ))}
       </div>
-      <p className="text-xs mt-2" style={{ color: "var(--color-text-muted)" }}>
-        {stars >= maxStars
-          ? "You reached LEGEND status!"
-          : `${maxStars - stars} more stars to Legend`}
+
+      <p className="text-xs text-center" style={{ color: "var(--color-text-muted)" }}>
+        {stars >= maxStars ? reachedText : remainingText}
       </p>
     </div>
   );

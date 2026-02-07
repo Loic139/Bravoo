@@ -6,6 +6,7 @@ export interface User {
   id: string;
   username: string;
   stars: number;
+  gold: number;
   rank: string;
   lastActiveDate: string | null;
   createdAt: string;
@@ -38,6 +39,7 @@ export async function getOrCreateUser(
   const userData = {
     username,
     stars: 0,
+    gold: 0,
     rank: "Bronze",
     lastActiveDate: null,
     createdAt: now,

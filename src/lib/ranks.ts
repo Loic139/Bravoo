@@ -5,17 +5,18 @@ export interface RankInfo {
   minStars: number;
   maxStars: number;
   color: string;
-  bgColor: string;
   emoji: string;
 }
 
 export const RANKS: RankInfo[] = [
-  { name: "Bronze", minStars: 0, maxStars: 5, color: "#CD7F32", bgColor: "bg-amber-700", emoji: "🥉" },
-  { name: "Silver", minStars: 6, maxStars: 12, color: "#C0C0C0", bgColor: "bg-gray-400", emoji: "🥈" },
-  { name: "Gold", minStars: 13, maxStars: 20, color: "#FFD700", bgColor: "bg-yellow-400", emoji: "🥇" },
-  { name: "Platinum", minStars: 21, maxStars: 29, color: "#E5E4E2", bgColor: "bg-slate-300", emoji: "💎" },
-  { name: "Legend", minStars: 30, maxStars: 999, color: "#FF6B35", bgColor: "bg-orange-500", emoji: "🏆" },
+  { name: "Bronze", minStars: 0, maxStars: 0, color: "#CD7F32", emoji: "🥉" },
+  { name: "Silver", minStars: 1, maxStars: 1, color: "#C0C0C0", emoji: "🥈" },
+  { name: "Gold", minStars: 2, maxStars: 2, color: "#FFD700", emoji: "🥇" },
+  { name: "Platinum", minStars: 3, maxStars: 3, color: "#E5E4E2", emoji: "💎" },
+  { name: "Legend", minStars: 4, maxStars: 999, color: "#FF6B35", emoji: "🏆" },
 ];
+
+export const MAX_STARS = 4;
 
 export function getRank(stars: number): RankInfo {
   const clamped = Math.max(0, stars);
@@ -25,14 +26,6 @@ export function getRank(stars: number): RankInfo {
     }
   }
   return RANKS[0];
-}
-
-export function getNextRank(currentRank: Rank): RankInfo | null {
-  const idx = RANKS.findIndex((r) => r.name === currentRank);
-  if (idx < RANKS.length - 1) {
-    return RANKS[idx + 1];
-  }
-  return null;
 }
 
 export function getDaysInMonth(date: Date = new Date()): number {

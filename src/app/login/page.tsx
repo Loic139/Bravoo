@@ -1,14 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { signInWithPopup } from "firebase/auth";
 import { auth, googleProvider } from "@/lib/firebase-client";
+import { detectLocale, t as translate, Locale } from "@/lib/i18n";
 
 export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [locale, setLocale] = useState<Locale>("en");
   const router = useRouter();
+
+  useEffect(() => {
+    setLocale(detectLocale());
+  }, []);
+
+  const tt = (key: string, params?: Record<string, string | number>) =>
+    translate(key, locale, params);
 
   async function handleGoogleLogin() {
     setError("");
@@ -18,7 +27,6 @@ export default function LoginPage() {
       const result = await signInWithPopup(auth, googleProvider);
       const idToken = await result.user.getIdToken();
 
-      // Send token to our backend to create/update user
       const res = await fetch("/api/auth", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -27,7 +35,7 @@ export default function LoginPage() {
 
       const contentType = res.headers.get("content-type") || "";
       if (!contentType.includes("application/json")) {
-        setError(`Server error (${res.status}). Check Cloud Function logs.`);
+        setError(tt("error.server", { status: res.status }));
         return;
       }
 
@@ -46,7 +54,7 @@ export default function LoginPage() {
       if (firebaseError.code === "auth/popup-closed-by-user") {
         setError("");
       } else if (firebaseError.code === "auth/unauthorized-domain") {
-        setError("This domain is not authorized. Add it in Firebase Console > Authentication > Settings > Authorized domains.");
+        setError(tt("error.unauthorized_domain"));
       } else {
         setError(firebaseError.code || firebaseError.message || "Unknown error");
       }
@@ -57,13 +65,13 @@ export default function LoginPage() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-dvh p-6">
-      <div className="animate-slide-up w-full">
+      <div className="animate-slide-up w-full max-w-sm">
         <div className="text-center mb-10">
           <h1 className="text-5xl font-black mb-2">
             <span style={{ color: "var(--color-primary)" }}>Bravoo</span>
           </h1>
           <p className="text-lg" style={{ color: "var(--color-text-muted)" }}>
-            2 minutes. 1 star. Daily momentum.
+            {tt("app.tagline")}
           </p>
         </div>
 
@@ -95,24 +103,46 @@ export default function LoginPage() {
                 d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
               />
             </svg>
-            {loading ? "Signing in..." : "Sign in with Google"}
+            {loading ? tt("app.login.signing_in") : tt("app.login.button")}
           </button>
         </div>
 
         <p
-          className="text-center text-sm mt-6"
+          className="text-center text-sm mt-6 whitespace-pre-line"
           style={{ color: "var(--color-text-muted)" }}
         >
-          One tap to sign in.
-          <br />
-          Start moving in 2 minutes!
+          {tt("app.login.subtitle")}
         </p>
 
+        {/* Language toggle */}
+        <div className="flex items-center justify-center gap-3 mt-6">
+          <button
+            onClick={() => setLocale("en")}
+            className={`text-sm px-3 py-1 rounded-full ${locale === "en" ? "font-bold" : ""}`}
+            style={{
+              background: locale === "en" ? "rgba(255, 107, 53, 0.15)" : "transparent",
+              color: locale === "en" ? "var(--color-primary)" : "var(--color-text-muted)",
+            }}
+          >
+            EN
+          </button>
+          <button
+            onClick={() => setLocale("fr")}
+            className={`text-sm px-3 py-1 rounded-full ${locale === "fr" ? "font-bold" : ""}`}
+            style={{
+              background: locale === "fr" ? "rgba(255, 107, 53, 0.15)" : "transparent",
+              color: locale === "fr" ? "var(--color-primary)" : "var(--color-text-muted)",
+            }}
+          >
+            FR
+          </button>
+        </div>
+
         <p
-          className="text-center text-xs mt-8"
+          className="text-center text-xs mt-6"
           style={{ color: "var(--color-text-muted)", opacity: 0.4 }}
         >
-          v1.3.0
+          {tt("app.version")}
         </p>
       </div>
     </div>
