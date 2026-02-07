@@ -28,9 +28,8 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files
+# env files (server secrets only)
 .env*.local
-.env
 
 # typescript
 *.tsbuildinfo

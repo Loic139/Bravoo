@@ -35,11 +35,14 @@ export default function LoginPage() {
       localStorage.setItem("bravoo_uid", data.user.id);
       localStorage.setItem("bravoo_username", data.user.username);
       router.push("/");
-    } catch (err) {
-      if (err instanceof Error && err.message.includes("popup-closed")) {
+    } catch (err: unknown) {
+      const firebaseError = err as { code?: string; message?: string };
+      if (firebaseError.code === "auth/popup-closed-by-user") {
         setError("");
+      } else if (firebaseError.code === "auth/unauthorized-domain") {
+        setError("This domain is not authorized. Add it in Firebase Console > Authentication > Settings > Authorized domains.");
       } else {
-        setError("Connection error. Please try again.");
+        setError(firebaseError.code || firebaseError.message || "Unknown error");
       }
     } finally {
       setLoading(false);
