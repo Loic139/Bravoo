@@ -107,6 +107,13 @@ export default function LoginPage() {
           <br />
           Start moving in 2 minutes!
         </p>
+
+        <p
+          className="text-center text-xs mt-8"
+          style={{ color: "var(--color-text-muted)", opacity: 0.4 }}
+        >
+          v1.2.0
+        </p>
       </div>
     </div>
   );
