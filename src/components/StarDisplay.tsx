@@ -22,22 +22,23 @@ export default function StarDisplay({
   return (
     <div className="card">
       <div className="flex items-center justify-between mb-3">
-        <span className="text-sm font-bold" style={{ color: "var(--color-text-muted)" }}>
+        <span className="text-xs font-semibold" style={{ color: "var(--color-text-secondary)" }}>
           {starsLabel}
         </span>
-        <span className="text-xs" style={{ color: "var(--color-text-muted)" }}>
+        <span className="text-[10px] font-medium" style={{ color: "var(--color-text-muted)" }}>
           {goalText}
         </span>
       </div>
 
       {/* Star icons row */}
-      <div className="flex items-center justify-center gap-3 mb-3">
+      <div className="flex items-center justify-center gap-4 mb-3">
         {starIcons.map((filled, i) => (
           <div
             key={i}
-            className={`text-3xl ${filled ? "animate-star-bounce" : ""}`}
+            className={`w-11 h-11 rounded-2xl flex items-center justify-center text-xl ${filled ? "animate-star-bounce" : ""}`}
             style={{
-              opacity: filled ? 1 : 0.2,
+              background: filled ? "#FEF3C7" : "var(--color-bg)",
+              opacity: filled ? 1 : 0.5,
               animationDelay: `${i * 0.1}s`,
             }}
           >
@@ -46,7 +47,7 @@ export default function StarDisplay({
         ))}
       </div>
 
-      <p className="text-xs text-center" style={{ color: "var(--color-text-muted)" }}>
+      <p className="text-[11px] text-center font-medium" style={{ color: "var(--color-text-muted)" }}>
         {stars >= maxStars ? reachedText : remainingText}
       </p>
     </div>

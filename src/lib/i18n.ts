@@ -10,7 +10,7 @@ const translations: Record<Locale, Record<string, string>> = {
     "app.login.signing_in": "Signing in...",
     "app.logout": "Logout",
     "app.loading": "Loading...",
-    "app.version": "v2.0.0",
+    "app.version": "v2.1.0",
 
     // Dashboard
     "dashboard.days_left": "Days left this month",
@@ -122,7 +122,7 @@ const translations: Record<Locale, Record<string, string>> = {
     "app.login.signing_in": "Connexion...",
     "app.logout": "Deconnexion",
     "app.loading": "Chargement...",
-    "app.version": "v2.0.0",
+    "app.version": "v2.1.0",
 
     // Dashboard
     "dashboard.days_left": "Jours restants ce mois",

@@ -59,7 +59,7 @@ export default function CompletionPopup({
           id: i,
           left: Math.random() * 100,
           delay: Math.random() * 0.5,
-          color: ["#FF6B35", "#FBBF24", "#22C55E", "#3B82F6", "#A855F7"][
+          color: ["#FF6B35", "#FBBF24", "#10B981", "#2563EB", "#7C3AED"][
             Math.floor(Math.random() * 5)
           ],
         }))
@@ -70,8 +70,16 @@ export default function CompletionPopup({
   if (!visible) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/60">
-      <div className="card w-full max-w-sm text-center animate-slide-up relative overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-6" style={{ background: "rgba(0,0,0,0.4)", backdropFilter: "blur(4px)" }}>
+      <div
+        className="w-full max-w-sm text-center animate-slide-up relative overflow-hidden"
+        style={{
+          background: "white",
+          borderRadius: "28px",
+          padding: "2rem 1.5rem",
+          boxShadow: "0 20px 60px rgba(0,0,0,0.15)",
+        }}
+      >
         {/* Confetti */}
         {confettiPieces.map((piece) => (
           <div
@@ -90,18 +98,26 @@ export default function CompletionPopup({
         ))}
 
         <div className="text-6xl mb-4 animate-star-bounce">🪙</div>
-        <h2 className="text-2xl font-black mb-2">{message}</h2>
-        <p className="text-lg mb-1" style={{ color: "var(--color-text-muted)" }}>
+        <h2 className="text-xl font-extrabold mb-1" style={{ color: "var(--color-text)" }}>{message}</h2>
+        <p className="text-sm mb-4" style={{ color: "var(--color-text-muted)" }}>
           {t("popup.well_done")}
         </p>
-        <p className="text-xl font-black mb-1" style={{ color: "var(--color-star)" }}>
-          {t("popup.gold_earned", { amount: goldEarned })}
-        </p>
-        <p className="text-sm mb-6" style={{ color: "var(--color-star)" }}>
+
+        <div
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl mb-2"
+          style={{ background: "#FEF3C7" }}
+        >
+          <span className="text-lg">🪙</span>
+          <span className="text-lg font-extrabold" style={{ color: "var(--color-gold)" }}>
+            {t("popup.gold_earned", { amount: goldEarned })}
+          </span>
+        </div>
+
+        <p className="text-sm mb-6" style={{ color: "var(--color-text-muted)" }}>
           {stars} ⭐
         </p>
 
-        <button onClick={onClose} className="btn-primary">
+        <button onClick={onClose} className="btn-accent">
           {t("popup.continue")}
         </button>
       </div>

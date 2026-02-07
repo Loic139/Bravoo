@@ -54,23 +54,23 @@ export default function LeaderboardPage() {
   }, []);
 
   return (
-    <div className="p-4 pb-8 space-y-4 max-w-lg mx-auto">
+    <div className="pb-8 max-w-lg mx-auto">
       {/* Header */}
-      <div className="flex items-center justify-between pt-2">
+      <div className="flex items-center justify-between px-5 pt-4 pb-2">
         <button
           onClick={() => router.push("/")}
-          className="text-sm font-medium px-3 py-1 rounded-lg"
-          style={{ color: "var(--color-text-muted)" }}
+          className="text-sm font-medium px-3 py-1.5 rounded-lg transition-colors"
+          style={{ color: "var(--color-text-secondary)", background: "var(--color-bg)" }}
         >
           &larr; {tt("leaderboard.back")}
         </button>
-        <h1 className="text-xl font-black" style={{ color: "var(--color-primary)" }}>
+        <h1 className="text-lg font-extrabold" style={{ color: "var(--color-text)", letterSpacing: "-0.02em" }}>
           {tt("leaderboard.title")}
         </h1>
         <div className="w-16" />
       </div>
 
-      <p className="text-center text-sm" style={{ color: "var(--color-text-muted)" }}>
+      <p className="text-center text-xs mb-4 font-medium" style={{ color: "var(--color-text-muted)" }}>
         {tt("leaderboard.monthly")} &mdash;{" "}
         {new Date().toLocaleString(locale === "fr" ? "fr-FR" : "en-US", {
           month: "long",
@@ -78,92 +78,96 @@ export default function LeaderboardPage() {
         })}
       </p>
 
-      {loading ? (
-        <div className="text-center py-12">
-          <div className="text-4xl mb-4 animate-pulse-gentle">🏆</div>
-          <p style={{ color: "var(--color-text-muted)" }}>{tt("app.loading")}</p>
-        </div>
-      ) : entries.length === 0 ? (
-        <div className="text-center py-12 card">
-          <p className="text-4xl mb-4">🌟</p>
-          <p className="font-bold">{tt("leaderboard.no_entries")}</p>
-          <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
-            {tt("leaderboard.no_entries_sub")}
-          </p>
-        </div>
-      ) : (
-        <div className="space-y-2">
-          {entries.map((entry, index) => {
-            const isCurrentUser = entry.username === currentDisplayName;
-            const position = index + 1;
-            const positionDisplay =
-              position === 1
-                ? "🥇"
-                : position === 2
-                  ? "🥈"
-                  : position === 3
-                    ? "🥉"
-                    : `#${position}`;
+      <div className="px-5">
+        {loading ? (
+          <div className="text-center py-16">
+            <div className="text-4xl mb-4 animate-pulse-gentle">🏆</div>
+            <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>{tt("app.loading")}</p>
+          </div>
+        ) : entries.length === 0 ? (
+          <div className="text-center py-16 card">
+            <p className="text-4xl mb-3">🌟</p>
+            <p className="font-bold text-sm" style={{ color: "var(--color-text)" }}>{tt("leaderboard.no_entries")}</p>
+            <p className="text-xs mt-1" style={{ color: "var(--color-text-muted)" }}>
+              {tt("leaderboard.no_entries_sub")}
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {entries.map((entry, index) => {
+              const isCurrentUser = entry.username === currentDisplayName;
+              const position = index + 1;
+              const positionDisplay =
+                position === 1
+                  ? "🥇"
+                  : position === 2
+                    ? "🥈"
+                    : position === 3
+                      ? "🥉"
+                      : `#${position}`;
 
-            return (
-              <div
-                key={entry.username}
-                className="card flex items-center gap-3"
-                style={{
-                  ...(isCurrentUser
-                    ? {
-                        border: "2px solid var(--color-primary)",
-                        background: "rgba(255, 107, 53, 0.08)",
-                      }
-                    : {}),
-                  ...(position <= 3
-                    ? { background: "rgba(251, 191, 36, 0.08)" }
-                    : {}),
-                }}
-              >
-                <div className="text-xl w-10 text-center font-bold">
-                  {positionDisplay}
-                </div>
-                <div className="flex-1">
-                  <p className="font-bold">
-                    {entry.username}
-                    {isCurrentUser && (
-                      <span
-                        className="text-xs ml-2"
-                        style={{ color: "var(--color-primary)" }}
-                      >
-                        {tt("leaderboard.you")}
+              return (
+                <div
+                  key={entry.username}
+                  className="card flex items-center gap-3"
+                  style={{
+                    padding: "0.875rem 1.25rem",
+                    ...(isCurrentUser
+                      ? {
+                          border: "2px solid var(--color-accent)",
+                          background: "rgba(255, 107, 53, 0.04)",
+                        }
+                      : {}),
+                    ...(position <= 3 && !isCurrentUser
+                      ? { background: "#FFFBEB" }
+                      : {}),
+                  }}
+                >
+                  <div className="text-lg w-8 text-center font-bold">
+                    {positionDisplay}
+                  </div>
+                  <div
+                    className="w-9 h-9 rounded-full flex items-center justify-center text-white font-bold text-xs flex-shrink-0"
+                    style={{ background: position <= 3 ? "var(--color-accent)" : "#D1D5DB" }}
+                  >
+                    {entry.username.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-sm truncate" style={{ color: "var(--color-text)" }}>
+                      {entry.username}
+                      {isCurrentUser && (
+                        <span
+                          className="text-[10px] ml-1.5 font-semibold"
+                          style={{ color: "var(--color-accent)" }}
+                        >
+                          {tt("leaderboard.you")}
+                        </span>
+                      )}
+                    </p>
+                    <p className="text-[10px] font-medium" style={{ color: "var(--color-text-muted)" }}>
+                      {RANK_EMOJIS[entry.rank] || ""} {tt(`rank.${entry.rank}`)}
+                    </p>
+                  </div>
+                  <div className="text-right flex-shrink-0">
+                    <div className="flex items-center gap-1 justify-end">
+                      <span className="text-lg font-extrabold" style={{ color: "var(--color-text)" }}>
+                        {entry.stars}
                       </span>
-                    )}
-                  </p>
-                  <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>
-                    {RANK_EMOJIS[entry.rank] || ""} {tt(`rank.${entry.rank}`)}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <div className="flex items-center gap-1">
-                    <span
-                      className="text-xl font-black"
-                      style={{ color: "var(--color-star)" }}
-                    >
-                      {entry.stars}
-                    </span>
-                    <span className="text-xs" style={{ color: "var(--color-text-muted)" }}>
-                      ⭐
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1 justify-end">
-                    <span className="text-xs">🪙</span>
-                    <span className="text-xs font-bold" style={{ color: "var(--color-star)" }}>
-                      {entry.gold}
-                    </span>
+                      <span className="text-xs">⭐</span>
+                    </div>
+                    <div className="flex items-center gap-0.5 justify-end">
+                      <span className="text-[10px]">🪙</span>
+                      <span className="text-[10px] font-semibold" style={{ color: "var(--color-gold)" }}>
+                        {entry.gold}
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

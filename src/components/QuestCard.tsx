@@ -50,40 +50,44 @@ export default function QuestCard({
     }
   }
 
-  const typeColor = type === "weekly" ? "#A855F7" : "#3B82F6";
+  const typeColor = type === "weekly" ? "var(--color-weekly)" : "var(--color-daily)";
   const typeLabel = type === "weekly" ? t("quests.weekly") : t("quests.daily");
 
   return (
     <div
       className="quest-card animate-slide-up"
       style={{
-        borderLeft: `4px solid ${completed ? "var(--color-success)" : typeColor}`,
-        opacity: completed ? 0.7 : 1,
+        borderLeft: `3px solid ${completed ? "var(--color-success)" : typeColor}`,
+        opacity: completed ? 0.6 : 1,
       }}
     >
-      {/* Header row: type badge + gold reward */}
-      <div className="flex items-center justify-between mb-2">
+      {/* Header row */}
+      <div className="flex items-center justify-between mb-2.5">
         <span
-          className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full"
+          className="badge"
           style={{
-            background: `${typeColor}25`,
+            background: `${type === "weekly" ? "#7C3AED" : "#2563EB"}10`,
             color: typeColor,
           }}
         >
           {typeLabel}
         </span>
-        <span className="flex items-center gap-1 text-sm font-bold" style={{ color: "var(--color-star)" }}>
-          <span>🪙</span>
-          {t("quests.gold_reward", { amount: goldReward })}
+        <span className="flex items-center gap-1 text-xs font-semibold" style={{ color: "var(--color-gold)" }}>
+          🪙 {t("quests.gold_reward", { amount: goldReward })}
         </span>
       </div>
 
       {/* Quest content */}
       <div className="flex items-center gap-3 mb-3">
-        <span className="text-3xl">{emoji}</span>
+        <div
+          className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0"
+          style={{ background: "var(--color-bg)" }}
+        >
+          {emoji}
+        </div>
         <div className="flex-1 min-w-0">
-          <h3 className="text-base font-bold leading-tight">{title}</h3>
-          <p className="text-xs mt-0.5" style={{ color: "var(--color-text-muted)" }}>
+          <h3 className="text-sm font-bold leading-tight" style={{ color: "var(--color-text)" }}>{title}</h3>
+          <p className="text-xs mt-0.5 leading-relaxed" style={{ color: "var(--color-text-muted)" }}>
             {description}
           </p>
         </div>
@@ -92,8 +96,8 @@ export default function QuestCard({
       {/* Actions */}
       {completed ? (
         <div
-          className="text-center py-2.5 rounded-xl font-bold text-sm"
-          style={{ background: "rgba(34, 197, 94, 0.15)", color: "var(--color-success)" }}
+          className="text-center py-2 rounded-xl font-semibold text-xs"
+          style={{ background: "#ECFDF5", color: "var(--color-success)" }}
         >
           {t("quests.completed")}
         </div>
@@ -102,7 +106,7 @@ export default function QuestCard({
           <button
             onClick={handleComplete}
             disabled={completing}
-            className="btn-primary flex-1 text-sm !py-2.5"
+            className="btn-accent flex-1 !text-sm !py-2.5 !rounded-xl"
           >
             {completing ? t("quests.validating") : t("quests.complete")}
           </button>

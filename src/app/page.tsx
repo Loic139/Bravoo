@@ -103,7 +103,7 @@ export default function Dashboard() {
       setQuests(questsData.quests || []);
       setProgress(questsData.progress || null);
     } catch {
-      // Network error, stay on page
+      // Network error
     } finally {
       setLoading(false);
     }
@@ -163,7 +163,7 @@ export default function Dashboard() {
       <div className="flex items-center justify-center min-h-dvh">
         <div className="text-center">
           <div className="text-4xl mb-4 animate-pulse-gentle">⭐</div>
-          <p style={{ color: "var(--color-text-muted)" }}>{tt("app.loading")}</p>
+          <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>{tt("app.loading")}</p>
         </div>
       </div>
     );
@@ -171,100 +171,107 @@ export default function Dashboard() {
 
   if (!user) return null;
 
-  // Build 4 slots: fill with quests or show empty
   const slotContents: (QuestData | null)[] = Array.from({ length: MAX_SLOTS }, (_, i) => {
     return quests.find((q) => q.slot === i) || null;
   });
 
-  const weeklyDone = progress ? progress.weeklyCompleted : 0;
-  const weeklyTotal = progress ? progress.weeklyTotal : 0;
-  const dailyDone = progress ? progress.dailyCompleted : 0;
-  const dailyTotal = progress ? progress.dailyTotal : 0;
+  const totalDone = (progress?.weeklyCompleted || 0) + (progress?.dailyCompleted || 0);
+  const totalQuests = (progress?.weeklyTotal || 0) + (progress?.dailyTotal || 0);
 
   return (
-    <div className="p-4 pb-8 space-y-4 max-w-lg mx-auto">
+    <div className="pb-8 max-w-lg mx-auto">
       {/* Header */}
-      <div className="flex items-center justify-between pt-2">
-        <div>
-          <h1 className="text-2xl font-black" style={{ color: "var(--color-primary)" }}>
-            Bravoo
-          </h1>
-        </div>
-        <button
-          onClick={handleLogout}
-          className="text-sm font-medium px-3 py-1 rounded-lg"
-          style={{ color: "var(--color-text-muted)" }}
-        >
-          {tt("app.logout")}
-        </button>
-      </div>
-
-      {/* User Info + Gold */}
-      <div className="card">
-        <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between px-5 pt-4 pb-3">
+        <div className="flex items-center gap-3">
+          <div
+            className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm"
+            style={{ background: "var(--color-accent)" }}
+          >
+            {user.username.charAt(0).toUpperCase()}
+          </div>
           <div>
-            <p className="text-lg font-bold">{user.username}</p>
+            <p className="text-sm font-semibold" style={{ color: "var(--color-text)" }}>{user.username}</p>
             <RankBadge
               rank={tt(`rank.${user.rank}`)}
               emoji={user.rankEmoji}
               color={user.rankColor}
             />
           </div>
-          <div className="text-right space-y-1">
-            <div className="flex items-center justify-end gap-1">
-              <span className="text-lg">🪙</span>
-              <span className="text-xl font-black" style={{ color: "var(--color-star)" }}>
-                {user.gold}
-              </span>
-            </div>
-            <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>
-              {tt("dashboard.days_left")}: {user.remainingDays}
-            </p>
-          </div>
+        </div>
+        <button
+          onClick={handleLogout}
+          className="text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
+          style={{ color: "var(--color-text-muted)", background: "var(--color-bg)" }}
+        >
+          {tt("app.logout")}
+        </button>
+      </div>
+
+      {/* Stat pills row */}
+      <div className="flex gap-3 px-5 mb-4">
+        <div className="stat-pill flex-1">
+          <span className="text-lg mb-0.5">⭐</span>
+          <span className="text-xl font-extrabold" style={{ color: "var(--color-text)" }}>{user.stars}</span>
+          <span className="text-[10px] font-medium" style={{ color: "var(--color-text-muted)" }}>
+            {tt("dashboard.stars_progress")}
+          </span>
+        </div>
+        <div className="stat-pill flex-1">
+          <span className="text-lg mb-0.5">🪙</span>
+          <span className="text-xl font-extrabold" style={{ color: "var(--color-text)" }}>{user.gold}</span>
+          <span className="text-[10px] font-medium" style={{ color: "var(--color-text-muted)" }}>
+            {tt("dashboard.gold")}
+          </span>
+        </div>
+        <div className="stat-pill flex-1">
+          <span className="text-lg mb-0.5">📅</span>
+          <span className="text-xl font-extrabold" style={{ color: "var(--color-text)" }}>{user.remainingDays}</span>
+          <span className="text-[10px] font-medium" style={{ color: "var(--color-text-muted)" }}>
+            {tt("dashboard.days_left")}
+          </span>
         </div>
       </div>
 
       {/* Stars Progress */}
-      <StarDisplay
-        stars={user.stars}
-        maxStars={MAX_STARS}
-        starsLabel={`${user.stars} / ${MAX_STARS} ⭐`}
-        goalText={tt("dashboard.stars_goal")}
-        reachedText={tt("dashboard.stars_reached")}
-        remainingText={tt("dashboard.stars_remaining", { count: MAX_STARS - user.stars })}
-      />
+      <div className="px-5 mb-4">
+        <StarDisplay
+          stars={user.stars}
+          maxStars={MAX_STARS}
+          starsLabel={`${user.stars} / ${MAX_STARS} ⭐`}
+          goalText={tt("dashboard.stars_goal")}
+          reachedText={tt("dashboard.stars_reached")}
+          remainingText={tt("dashboard.stars_remaining", { count: MAX_STARS - user.stars })}
+        />
+      </div>
 
       {/* Weekly Progress Bar */}
       {progress && (
-        <div className="card" style={{ padding: "1rem 1.5rem" }}>
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold" style={{ color: "var(--color-text-muted)" }}>
-              {tt("quests.weekly_progress", {
-                completed: weeklyDone + dailyDone,
-                total: weeklyTotal + dailyTotal,
-              })}
-            </span>
-            {progress.starAwarded && (
-              <span className="text-xs font-bold" style={{ color: "var(--color-success)" }}>
-                {tt("quests.star_earned")}
+        <div className="px-5 mb-5">
+          <div className="card" style={{ padding: "0.875rem 1.25rem" }}>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-semibold" style={{ color: "var(--color-text-secondary)" }}>
+                {tt("quests.weekly_progress", { completed: totalDone, total: totalQuests })}
               </span>
-            )}
-          </div>
-          <div className="progress-bar">
-            <div
-              className="progress-bar-fill"
-              style={{
-                width: `${weeklyTotal + dailyTotal > 0
-                  ? ((weeklyDone + dailyDone) / (weeklyTotal + dailyTotal)) * 100
-                  : 0}%`,
-              }}
-            />
+              {progress.starAwarded && (
+                <span className="text-xs font-semibold" style={{ color: "var(--color-success)" }}>
+                  {tt("quests.star_earned")}
+                </span>
+              )}
+            </div>
+            <div className="progress-bar">
+              <div
+                className="progress-bar-fill"
+                style={{
+                  width: `${totalQuests > 0 ? (totalDone / totalQuests) * 100 : 0}%`,
+                }}
+              />
+            </div>
           </div>
         </div>
       )}
 
       {/* Quest Slots */}
-      <div className="space-y-3">
+      <div className="px-5 space-y-3 mb-5">
         {slotContents.map((quest, slotIndex) =>
           quest ? (
             <QuestCard
@@ -291,13 +298,15 @@ export default function Dashboard() {
       </div>
 
       {/* Leaderboard Link */}
-      <button
-        onClick={() => router.push("/leaderboard")}
-        className="btn-secondary flex items-center justify-center gap-2"
-      >
-        <span>🏆</span>
-        {tt("dashboard.leaderboard")}
-      </button>
+      <div className="px-5">
+        <button
+          onClick={() => router.push("/leaderboard")}
+          className="btn-secondary flex items-center justify-center gap-2"
+        >
+          <span>🏆</span>
+          {tt("dashboard.leaderboard")}
+        </button>
+      </div>
 
       {/* Completion Popup */}
       <CompletionPopup
