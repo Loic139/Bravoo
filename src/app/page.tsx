@@ -6,12 +6,13 @@ import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase-client";
 import { detectLocale, t as translate, Locale } from "@/lib/i18n";
 import { motion } from "framer-motion";
-import { LogOut, Trophy, Star, Coins, CalendarDays, Loader2 } from "lucide-react";
+import { LogOut, Star, Coins, CalendarDays, Loader2 } from "lucide-react";
 import QuestCard from "@/components/QuestCard";
 import EmptySlot from "@/components/EmptySlot";
 import StarDisplay from "@/components/StarDisplay";
 import RankBadge from "@/components/RankBadge";
 import CompletionPopup from "@/components/CompletionPopup";
+import TabBar from "@/components/TabBar";
 import { MAX_STARS } from "@/lib/ranks";
 
 interface UserData {
@@ -122,7 +123,7 @@ export default function Dashboard() {
   const pct = totalAll > 0 ? (totalDone / totalAll) * 100 : 0;
 
   return (
-    <div className="pb-8 max-w-lg mx-auto">
+    <div className="pb-24 max-w-lg mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between px-5 pt-4 pb-2">
         <div className="flex items-center gap-3">
@@ -226,22 +227,12 @@ export default function Dashboard() {
         )}
       </div>
 
-      {/* Leaderboard */}
-      <div className="px-5">
-        <button
-          onClick={() => router.push("/leaderboard")}
-          className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl border text-sm font-semibold transition-all hover:bg-gray-50"
-          style={{ background: "white", borderColor: "var(--border)", color: "var(--text)" }}
-        >
-          <Trophy className="w-4 h-4" style={{ color: "var(--star)" }} />
-          {tt("dashboard.leaderboard")}
-        </button>
-      </div>
-
       <CompletionPopup
         visible={showPopup} goldEarned={popupGold} stars={popupStars}
         locale={locale} t={tt} onClose={() => setShowPopup(false)}
       />
+
+      <TabBar t={tt} />
     </div>
   );
 }

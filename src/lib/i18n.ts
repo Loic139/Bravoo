@@ -107,6 +107,18 @@ const translations: Record<Locale, Record<string, string>> = {
     "popup.stop": "Stop for today",
     "popup.continue_training": "Would you like to continue training?",
 
+    // Tabs
+    "tab.quests": "Quests",
+    "tab.character": "Character",
+    "tab.shop": "Shop",
+    "tab.battles": "Battles",
+
+    // Coming soon
+    "coming_soon.title": "Coming Soon",
+    "coming_soon.character": "Customize your avatar, track your stats, and level up your character.",
+    "coming_soon.shop": "Spend your gold on power-ups, cosmetics, and special items.",
+    "coming_soon.battles": "Challenge other players and climb the ranks!",
+
     // Errors
     "error.connection": "Connection error. Please try again.",
     "error.unauthorized_domain": "This domain is not authorized.",
@@ -218,6 +230,18 @@ const translations: Record<Locale, Record<string, string>> = {
     "popup.continue": "Continuer",
     "popup.stop": "Arreter pour aujourd'hui",
     "popup.continue_training": "Tu veux continuer a t'entrainer ?",
+
+    // Tabs
+    "tab.quests": "Quetes",
+    "tab.character": "Personnage",
+    "tab.shop": "Boutique",
+    "tab.battles": "Combats",
+
+    // Coming soon
+    "coming_soon.title": "Bientot disponible",
+    "coming_soon.character": "Personnalise ton avatar, suis tes stats et fais evoluer ton personnage.",
+    "coming_soon.shop": "Depense ton or pour des bonus, des cosmetiques et des objets speciaux.",
+    "coming_soon.battles": "Defie d'autres joueurs et grimpe dans le classement !",
 
     // Errors
     "error.connection": "Erreur de connexion. Reessaie.",
