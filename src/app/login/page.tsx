@@ -25,6 +25,12 @@ export default function LoginPage() {
         body: JSON.stringify({ idToken }),
       });
 
+      const contentType = res.headers.get("content-type") || "";
+      if (!contentType.includes("application/json")) {
+        setError(`Server error (${res.status}). Check Cloud Function logs.`);
+        return;
+      }
+
       const data = await res.json();
 
       if (!res.ok) {
