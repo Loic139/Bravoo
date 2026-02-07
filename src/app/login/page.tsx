@@ -112,7 +112,7 @@ export default function LoginPage() {
           className="text-center text-xs mt-8"
           style={{ color: "var(--color-text-muted)", opacity: 0.4 }}
         >
-          v1.2.0
+          v1.3.0
         </p>
       </div>
     </div>
