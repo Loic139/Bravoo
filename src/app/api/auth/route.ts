@@ -13,9 +13,11 @@ export async function POST(req: NextRequest) {
     const user = await getOrCreateUser(decoded.uid, decoded.name, decoded.email);
 
     return NextResponse.json({ user });
-  } catch {
+  } catch (err) {
+    console.error("Auth error:", err);
+    const message = err instanceof Error ? err.message : "Unknown error";
     return NextResponse.json(
-      { error: "Invalid or expired token" },
+      { error: `Auth failed: ${message}` },
       { status: 401 }
     );
   }
