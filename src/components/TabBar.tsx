@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Swords, User, ShoppingBag, Dumbbell } from "lucide-react";
+import { Swords, User, ShoppingBag, Dumbbell, MessageSquare } from "lucide-react";
 
 interface Tab {
   key: string;
@@ -24,6 +24,7 @@ export default function TabBar({ t }: TabBarProps) {
     { key: "character", path: "/character", icon: <User className="w-5 h-5" />, label: t("tab.character") },
     { key: "shop", path: "/shop", icon: <ShoppingBag className="w-5 h-5" />, label: t("tab.shop") },
     { key: "battles", path: "/battles", icon: <Swords className="w-5 h-5" />, label: t("tab.battles") },
+    { key: "feedback", path: "/feedback", icon: <MessageSquare className="w-5 h-5" />, label: t("tab.feedback") },
   ];
 
   return (

@@ -121,6 +121,21 @@ const translations: Record<Locale, Record<string, string>> = {
     "coming_soon.shop": "Spend your gold on power-ups, cosmetics, and special items.",
     "coming_soon.battles": "Challenge other players and climb the ranks!",
 
+    // Feedback
+    "tab.feedback": "Ideas",
+    "feedback.title": "Suggestions",
+    "feedback.subtitle": "Help us improve Bravoo! Share your ideas.",
+    "feedback.placeholder": "Describe your idea or suggestion...",
+    "feedback.send": "Send",
+    "feedback.sent": "Thanks for your feedback!",
+    "feedback.all_suggestions": "All suggestions",
+    "feedback.empty": "No suggestions yet",
+    "feedback.empty_sub": "Be the first to share an idea!",
+    "feedback.just_now": "Just now",
+    "feedback.mins_ago": "{count}m ago",
+    "feedback.hours_ago": "{count}h ago",
+    "feedback.days_ago": "{count}d ago",
+
     // Errors
     "error.connection": "Connection error. Please try again.",
     "error.unauthorized_domain": "This domain is not authorized.",
@@ -246,6 +261,21 @@ const translations: Record<Locale, Record<string, string>> = {
     "coming_soon.character": "Personnalise ton avatar, suis tes stats et fais evoluer ton personnage.",
     "coming_soon.shop": "Depense ton or pour des bonus, des cosmetiques et des objets speciaux.",
     "coming_soon.battles": "Defie d'autres joueurs et grimpe dans le classement !",
+
+    // Feedback
+    "tab.feedback": "Idees",
+    "feedback.title": "Suggestions",
+    "feedback.subtitle": "Aide-nous a ameliorer Bravoo ! Partage tes idees.",
+    "feedback.placeholder": "Decris ton idee ou suggestion...",
+    "feedback.send": "Envoyer",
+    "feedback.sent": "Merci pour ton retour !",
+    "feedback.all_suggestions": "Toutes les suggestions",
+    "feedback.empty": "Aucune suggestion",
+    "feedback.empty_sub": "Sois le premier a partager une idee !",
+    "feedback.just_now": "A l'instant",
+    "feedback.mins_ago": "Il y a {count}min",
+    "feedback.hours_ago": "Il y a {count}h",
+    "feedback.days_ago": "Il y a {count}j",
 
     // Errors
     "error.connection": "Erreur de connexion. Reessaie.",
