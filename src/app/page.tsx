@@ -6,12 +6,12 @@ import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase-client";
 import { detectLocale, t as translate, Locale } from "@/lib/i18n";
 import { motion } from "framer-motion";
-import { LogOut, Trophy, Star, Coins, CalendarDays, Loader2 } from "lucide-react";
+import { LogOut, Star, Coins, CalendarDays, Loader2, TrendingUp, ChevronRight } from "lucide-react";
 import QuestCard from "@/components/QuestCard";
 import EmptySlot from "@/components/EmptySlot";
 import StarDisplay from "@/components/StarDisplay";
-import RankBadge from "@/components/RankBadge";
 import CompletionPopup from "@/components/CompletionPopup";
+import TabBar from "@/components/TabBar";
 import { MAX_STARS } from "@/lib/ranks";
 
 interface UserData {
@@ -107,7 +107,7 @@ export default function Dashboard() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-dvh">
-        <Loader2 className="w-8 h-8 animate-spin" style={{ color: "var(--text-muted)" }} />
+        <Loader2 className="w-6 h-6 animate-spin" style={{ color: "var(--accent)" }} />
       </div>
     );
   }
@@ -122,76 +122,85 @@ export default function Dashboard() {
   const pct = totalAll > 0 ? (totalDone / totalAll) * 100 : 0;
 
   return (
-    <div className="pb-8 max-w-lg mx-auto">
-      {/* Header */}
-      <div className="flex items-center justify-between px-5 pt-4 pb-2">
-        <div className="flex items-center gap-3">
-          <div
-            className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm"
-            style={{ background: "var(--accent)" }}
-          >
-            {user.username.charAt(0).toUpperCase()}
+    <div className="pb-24 max-w-lg mx-auto">
+      {/* Profile header */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="bg-white"
+      >
+        <div className="flex items-center justify-between px-4 pt-4 pb-3">
+          <div className="flex items-center gap-3">
+            <div
+              className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm"
+              style={{ background: "var(--accent)" }}
+            >
+              {user.username.charAt(0).toUpperCase()}
+            </div>
+            <div>
+              <p className="text-[15px] font-bold leading-tight">{user.username}</p>
+              <p className="text-[11px] font-medium" style={{ color: user.rankColor }}>
+                {tt(`rank.${user.rank}`)}
+              </p>
+            </div>
           </div>
-          <div>
-            <p className="text-sm font-semibold">{user.username}</p>
-            <RankBadge rank={tt(`rank.${user.rank}`)} emoji={user.rankEmoji} color={user.rankColor} />
+          <button
+            onClick={handleLogout}
+            className="p-2 -mr-1 rounded-lg transition-colors hover:bg-gray-50 active:bg-gray-100"
+            title={tt("app.logout")}
+          >
+            <LogOut className="w-[18px] h-[18px]" style={{ color: "var(--text-muted)" }} />
+          </button>
+        </div>
+
+        {/* Compact stats bar */}
+        <div className="flex items-center border-t px-4 py-2.5" style={{ borderColor: "var(--border)" }}>
+          <div className="flex items-center gap-1.5 flex-1">
+            <Star className="w-3.5 h-3.5" style={{ color: "var(--star)" }} />
+            <span className="text-sm font-bold">{user.stars}</span>
+            <span className="text-[10px] font-medium" style={{ color: "var(--text-muted)" }}>/{MAX_STARS}</span>
+          </div>
+          <div className="w-px h-4 bg-gray-200" />
+          <div className="flex items-center gap-1.5 flex-1 justify-center">
+            <Coins className="w-3.5 h-3.5" style={{ color: "var(--gold)" }} />
+            <span className="text-sm font-bold">{user.gold}</span>
+          </div>
+          <div className="w-px h-4 bg-gray-200" />
+          <div className="flex items-center gap-1.5 flex-1 justify-end">
+            <CalendarDays className="w-3.5 h-3.5" style={{ color: "var(--text-muted)" }} />
+            <span className="text-sm font-bold">{user.remainingDays}</span>
+            <span className="text-[10px] font-medium" style={{ color: "var(--text-muted)" }}>{tt("dashboard.days_short")}</span>
           </div>
         </div>
-        <button
-          onClick={handleLogout}
-          className="p-2 rounded-xl transition-colors hover:bg-gray-100"
-          title={tt("app.logout")}
-        >
-          <LogOut className="w-4.5 h-4.5" style={{ color: "var(--text-muted)" }} />
-        </button>
-      </div>
-
-      {/* Stats row */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className="flex gap-3 px-5 mt-2 mb-4"
-      >
-        {[
-          { icon: <Star className="w-4 h-4" style={{ color: "var(--star)" }} />, value: user.stars, label: tt("dashboard.stars_progress") },
-          { icon: <Coins className="w-4 h-4" style={{ color: "var(--gold)" }} />, value: user.gold, label: tt("dashboard.gold") },
-          { icon: <CalendarDays className="w-4 h-4" style={{ color: "var(--text-muted)" }} />, value: user.remainingDays, label: tt("dashboard.days_left") },
-        ].map((s, i) => (
-          <div
-            key={i}
-            className="flex-1 flex flex-col items-center gap-1 py-3 rounded-2xl border"
-            style={{ background: "white", borderColor: "var(--border)" }}
-          >
-            {s.icon}
-            <span className="text-xl font-extrabold">{s.value}</span>
-            <span className="text-[10px] font-medium" style={{ color: "var(--text-muted)" }}>{s.label}</span>
-          </div>
-        ))}
       </motion.div>
 
-      {/* Stars */}
-      <div className="px-5 mb-4">
+      {/* Monthly stars progress */}
+      <div className="px-4 mt-3">
         <StarDisplay
-          stars={user.stars} maxStars={MAX_STARS}
-          starsLabel={`${user.stars} / ${MAX_STARS} ⭐`}
+          stars={user.stars}
+          maxStars={MAX_STARS}
           goalText={tt("dashboard.stars_goal")}
           reachedText={tt("dashboard.stars_reached")}
           remainingText={tt("dashboard.stars_remaining", { count: MAX_STARS - user.stars })}
         />
       </div>
 
-      {/* Progress bar */}
+      {/* Weekly progress */}
       {progress && (
-        <div className="px-5 mb-5">
-          <div className="rounded-2xl p-4 border" style={{ background: "white", borderColor: "var(--border)" }}>
-            <div className="flex items-center justify-between mb-2.5">
-              <span className="text-xs font-semibold" style={{ color: "var(--text-secondary)" }}>
-                {tt("quests.weekly_progress", { completed: totalDone, total: totalAll })}
-              </span>
+        <div className="px-4 mt-3">
+          <div className="bg-white rounded-xl p-3.5" style={{ border: "1px solid var(--border)" }}>
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-1.5">
+                <TrendingUp className="w-3.5 h-3.5" style={{ color: "var(--accent)" }} />
+                <span className="text-xs font-semibold" style={{ color: "var(--text-secondary)" }}>
+                  {tt("quests.weekly_progress", { completed: totalDone, total: totalAll })}
+                </span>
+              </div>
               {progress.starAwarded && (
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
-                  style={{ background: "rgba(16,185,129,0.1)", color: "var(--success)" }}>
+                <span
+                  className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                  style={{ background: "var(--success-light)", color: "var(--success)" }}
+                >
                   {tt("quests.star_earned")}
                 </span>
               )}
@@ -202,21 +211,36 @@ export default function Dashboard() {
                 animate={{ width: `${pct}%` }}
                 transition={{ duration: 0.8, ease: "easeOut" }}
                 className="h-full rounded-full"
-                style={{ background: "linear-gradient(90deg, var(--accent), var(--star))" }}
+                style={{ background: "var(--accent)" }}
               />
             </div>
           </div>
         </div>
       )}
 
+      {/* Section title */}
+      <div className="flex items-center justify-between px-4 mt-5 mb-2.5">
+        <h2 className="text-[13px] font-bold uppercase tracking-wide" style={{ color: "var(--text-secondary)" }}>
+          {tt("quests.today_title")}
+        </h2>
+        <button
+          onClick={() => router.push("/leaderboard")}
+          className="flex items-center gap-0.5 text-[12px] font-semibold transition-colors hover:opacity-70"
+          style={{ color: "var(--accent)" }}
+        >
+          {tt("dashboard.leaderboard")}
+          <ChevronRight className="w-3.5 h-3.5" />
+        </button>
+      </div>
+
       {/* Quests */}
-      <div className="px-5 space-y-3 mb-5">
+      <div className="px-4 space-y-2.5">
         {slots.map((q, i) =>
           q ? (
             <QuestCard
               key={q.id} id={q.id} type={q.type}
               title={tt(q.titleKey)} description={tt(q.descriptionKey)}
-              emoji={q.emoji} goldReward={q.goldReward}
+              goldReward={q.goldReward}
               completed={q.completed} rerolled={q.rerolled}
               onComplete={handleComplete} onReroll={handleReroll} t={tt}
             />
@@ -226,22 +250,12 @@ export default function Dashboard() {
         )}
       </div>
 
-      {/* Leaderboard */}
-      <div className="px-5">
-        <button
-          onClick={() => router.push("/leaderboard")}
-          className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl border text-sm font-semibold transition-all hover:bg-gray-50"
-          style={{ background: "white", borderColor: "var(--border)", color: "var(--text)" }}
-        >
-          <Trophy className="w-4 h-4" style={{ color: "var(--star)" }} />
-          {tt("dashboard.leaderboard")}
-        </button>
-      </div>
-
       <CompletionPopup
         visible={showPopup} goldEarned={popupGold} stars={popupStars}
         locale={locale} t={tt} onClose={() => setShowPopup(false)}
       />
+
+      <TabBar t={tt} />
     </div>
   );
 }

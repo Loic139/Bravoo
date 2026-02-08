@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Coins, ArrowRight } from "lucide-react";
+import { Coins, ArrowRight, Star } from "lucide-react";
 
 const MESSAGES_EN = [
   "Boom! You crushed it!", "Bravoo champ!", "Unstoppable!",
@@ -39,7 +39,7 @@ export default function CompletionPopup({
           id: i,
           left: Math.random() * 100,
           delay: Math.random() * 0.4,
-          color: ["#FF6B35", "#FBBF24", "#10B981", "#2563EB", "#7C3AED"][Math.floor(Math.random() * 5)],
+          color: ["#FC4C02", "#F59E0B", "#10B981", "#2563EB", "#6D28D9"][Math.floor(Math.random() * 5)],
         }))
       );
     }
@@ -56,12 +56,12 @@ export default function CompletionPopup({
           style={{ background: "rgba(0,0,0,0.4)", backdropFilter: "blur(8px)" }}
         >
           <motion.div
-            initial={{ scale: 0.85, opacity: 0 }}
+            initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.85, opacity: 0 }}
+            exit={{ scale: 0.9, opacity: 0 }}
             transition={{ type: "spring", stiffness: 300, damping: 25 }}
-            className="w-full max-w-sm text-center relative overflow-hidden rounded-3xl p-8"
-            style={{ background: "white", boxShadow: "0 24px 64px rgba(0,0,0,0.15)" }}
+            className="w-full max-w-sm text-center relative overflow-hidden rounded-2xl p-8 bg-white"
+            style={{ boxShadow: "0 24px 64px rgba(0,0,0,0.15)" }}
           >
             {/* Confetti */}
             {confetti.map((p) => (
@@ -70,7 +70,7 @@ export default function CompletionPopup({
                 className="absolute animate-confetti"
                 style={{
                   left: `${p.left}%`, bottom: 0, animationDelay: `${p.delay}s`,
-                  width: 8, height: 8, borderRadius: "50%", background: p.color,
+                  width: 6, height: 6, borderRadius: "50%", background: p.color,
                 }}
               />
             ))}
@@ -79,28 +79,33 @@ export default function CompletionPopup({
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.15, type: "spring", stiffness: 200 }}
-              className="text-6xl mb-5"
+              className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-5"
+              style={{ background: "var(--accent-light)" }}
             >
-              🪙
+              <Coins className="w-8 h-8" style={{ color: "var(--accent)" }} />
             </motion.div>
 
             <h2 className="text-xl font-extrabold mb-1">{message}</h2>
             <p className="text-sm mb-5" style={{ color: "var(--text-muted)" }}>{t("popup.well_done")}</p>
 
             <div
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl mb-2"
-              style={{ background: "#FEF3C7" }}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl mb-2"
+              style={{ background: "var(--star-light)" }}
             >
               <Coins className="w-5 h-5" style={{ color: "var(--gold)" }} />
               <span className="text-lg font-extrabold" style={{ color: "var(--gold)" }}>
                 {t("popup.gold_earned", { amount: goldEarned })}
               </span>
             </div>
-            <p className="text-sm mb-6" style={{ color: "var(--text-muted)" }}>{stars} ⭐</p>
+            <div className="flex items-center justify-center gap-1 mb-6">
+              {Array.from({ length: stars }, (_, i) => (
+                <Star key={i} className="w-4 h-4" style={{ color: "var(--star)", fill: "var(--star)" }} />
+              ))}
+            </div>
 
             <button
               onClick={onClose}
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl text-sm font-semibold text-white transition-all duration-200 hover:shadow-md active:scale-[0.97]"
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold text-white transition-all duration-150 active:scale-[0.97]"
               style={{ background: "var(--accent)" }}
             >
               {t("popup.continue")}

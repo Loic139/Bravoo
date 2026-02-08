@@ -10,16 +10,17 @@ const translations: Record<Locale, Record<string, string>> = {
     "app.login.signing_in": "Signing in...",
     "app.logout": "Logout",
     "app.loading": "Loading...",
-    "app.version": "v2.1.0",
+    "app.version": "v2.3.0",
 
     // Dashboard
     "dashboard.days_left": "Days left this month",
+    "dashboard.days_short": "d",
     "dashboard.gold": "Gold",
     "dashboard.stars_progress": "stars",
     "dashboard.stars_goal": "Goal: 4 stars this month",
     "dashboard.stars_reached": "You reached LEGEND status!",
-    "dashboard.stars_remaining": "{count} more stars to Legend",
-    "dashboard.leaderboard": "View Leaderboard",
+    "dashboard.stars_remaining": "{count} more star(s) to Legend",
+    "dashboard.leaderboard": "Leaderboard",
 
     // Quests
     "quests.daily": "Daily",
@@ -33,8 +34,9 @@ const translations: Record<Locale, Record<string, string>> = {
     "quests.new_quest_tomorrow": "New quest tomorrow",
     "quests.new_quests_monday": "New quests Monday",
     "quests.gold_reward": "+{amount} gold",
-    "quests.weekly_progress": "Weekly: {completed}/{total}",
-    "quests.star_earned": "Star earned this week!",
+    "quests.weekly_progress": "Week: {completed}/{total}",
+    "quests.star_earned": "Star earned!",
+    "quests.today_title": "Today's Quests",
 
     // Quest titles
     "quest.daily.squats10": "10 Squats",
@@ -107,6 +109,33 @@ const translations: Record<Locale, Record<string, string>> = {
     "popup.stop": "Stop for today",
     "popup.continue_training": "Would you like to continue training?",
 
+    // Tabs
+    "tab.quests": "Quests",
+    "tab.character": "Character",
+    "tab.shop": "Shop",
+    "tab.battles": "Battles",
+
+    // Coming soon
+    "coming_soon.title": "Coming Soon",
+    "coming_soon.character": "Customize your avatar, track your stats, and level up your character.",
+    "coming_soon.shop": "Spend your gold on power-ups, cosmetics, and special items.",
+    "coming_soon.battles": "Challenge other players and climb the ranks!",
+
+    // Feedback
+    "tab.feedback": "Ideas",
+    "feedback.title": "Suggestions",
+    "feedback.subtitle": "Help us improve Bravoo! Share your ideas.",
+    "feedback.placeholder": "Describe your idea or suggestion...",
+    "feedback.send": "Send",
+    "feedback.sent": "Thanks for your feedback!",
+    "feedback.all_suggestions": "All suggestions",
+    "feedback.empty": "No suggestions yet",
+    "feedback.empty_sub": "Be the first to share an idea!",
+    "feedback.just_now": "Just now",
+    "feedback.mins_ago": "{count}m ago",
+    "feedback.hours_ago": "{count}h ago",
+    "feedback.days_ago": "{count}d ago",
+
     // Errors
     "error.connection": "Connection error. Please try again.",
     "error.unauthorized_domain": "This domain is not authorized.",
@@ -122,16 +151,17 @@ const translations: Record<Locale, Record<string, string>> = {
     "app.login.signing_in": "Connexion...",
     "app.logout": "Deconnexion",
     "app.loading": "Chargement...",
-    "app.version": "v2.1.0",
+    "app.version": "v2.3.0",
 
     // Dashboard
     "dashboard.days_left": "Jours restants ce mois",
+    "dashboard.days_short": "j",
     "dashboard.gold": "Or",
     "dashboard.stars_progress": "etoiles",
     "dashboard.stars_goal": "Objectif : 4 etoiles ce mois",
     "dashboard.stars_reached": "Tu as atteint le rang LEGENDE !",
     "dashboard.stars_remaining": "Encore {count} etoile(s) pour la Legende",
-    "dashboard.leaderboard": "Voir le classement",
+    "dashboard.leaderboard": "Classement",
 
     // Quests
     "quests.daily": "Journaliere",
@@ -146,7 +176,8 @@ const translations: Record<Locale, Record<string, string>> = {
     "quests.new_quests_monday": "Nouvelles quetes lundi",
     "quests.gold_reward": "+{amount} or",
     "quests.weekly_progress": "Semaine : {completed}/{total}",
-    "quests.star_earned": "Etoile gagnee cette semaine !",
+    "quests.star_earned": "Etoile gagnee !",
+    "quests.today_title": "Quetes du jour",
 
     // Quest titles
     "quest.daily.squats10": "10 Squats",
@@ -218,6 +249,33 @@ const translations: Record<Locale, Record<string, string>> = {
     "popup.continue": "Continuer",
     "popup.stop": "Arreter pour aujourd'hui",
     "popup.continue_training": "Tu veux continuer a t'entrainer ?",
+
+    // Tabs
+    "tab.quests": "Quetes",
+    "tab.character": "Personnage",
+    "tab.shop": "Boutique",
+    "tab.battles": "Combats",
+
+    // Coming soon
+    "coming_soon.title": "Bientot disponible",
+    "coming_soon.character": "Personnalise ton avatar, suis tes stats et fais evoluer ton personnage.",
+    "coming_soon.shop": "Depense ton or pour des bonus, des cosmetiques et des objets speciaux.",
+    "coming_soon.battles": "Defie d'autres joueurs et grimpe dans le classement !",
+
+    // Feedback
+    "tab.feedback": "Idees",
+    "feedback.title": "Suggestions",
+    "feedback.subtitle": "Aide-nous a ameliorer Bravoo ! Partage tes idees.",
+    "feedback.placeholder": "Decris ton idee ou suggestion...",
+    "feedback.send": "Envoyer",
+    "feedback.sent": "Merci pour ton retour !",
+    "feedback.all_suggestions": "Toutes les suggestions",
+    "feedback.empty": "Aucune suggestion",
+    "feedback.empty_sub": "Sois le premier a partager une idee !",
+    "feedback.just_now": "A l'instant",
+    "feedback.mins_ago": "Il y a {count}min",
+    "feedback.hours_ago": "Il y a {count}h",
+    "feedback.days_ago": "Il y a {count}j",
 
     // Errors
     "error.connection": "Erreur de connexion. Reessaie.",
