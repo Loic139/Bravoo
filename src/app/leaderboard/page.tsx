@@ -5,15 +5,11 @@ import { useRouter } from "next/navigation";
 import { auth } from "@/lib/firebase-client";
 import { detectLocale, t as translate, Locale } from "@/lib/i18n";
 import { motion } from "framer-motion";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2, Star, Coins, Trophy } from "lucide-react";
 
 interface Entry {
   username: string; stars: number; gold: number; rank: string;
 }
-
-const RANK_EMOJIS: Record<string, string> = {
-  Bronze: "🥉", Silver: "🥈", Gold: "🥇", Platinum: "💎", Legend: "🏆",
-};
 
 export default function LeaderboardPage() {
   const router = useRouter();
@@ -39,83 +35,89 @@ export default function LeaderboardPage() {
   return (
     <div className="pb-8 max-w-lg mx-auto">
       {/* Header */}
-      <div className="flex items-center justify-between px-5 pt-4 pb-2">
-        <button
-          onClick={() => router.push("/")}
-          className="p-2 rounded-xl transition-colors hover:bg-gray-100"
-        >
-          <ArrowLeft className="w-5 h-5" style={{ color: "var(--text-secondary)" }} />
-        </button>
-        <h1 className="text-lg font-extrabold" style={{ letterSpacing: "-0.02em" }}>
-          {tt("leaderboard.title")}
-        </h1>
-        <div className="w-9" />
+      <div className="bg-white" style={{ borderBottom: "1px solid var(--border)" }}>
+        <div className="flex items-center justify-between px-4 py-3">
+          <button
+            onClick={() => router.push("/")}
+            className="p-1.5 rounded-lg transition-colors hover:bg-gray-50"
+          >
+            <ArrowLeft className="w-5 h-5" style={{ color: "var(--text-secondary)" }} />
+          </button>
+          <h1 className="text-[15px] font-bold">
+            {tt("leaderboard.title")}
+          </h1>
+          <div className="w-8" />
+        </div>
+        <p className="text-center text-[11px] pb-2.5 font-medium" style={{ color: "var(--text-muted)" }}>
+          {tt("leaderboard.monthly")} &mdash;{" "}
+          {new Date().toLocaleString(locale === "fr" ? "fr-FR" : "en-US", { month: "long", year: "numeric" })}
+        </p>
       </div>
 
-      <p className="text-center text-xs mb-4 font-medium" style={{ color: "var(--text-muted)" }}>
-        {tt("leaderboard.monthly")} &mdash;{" "}
-        {new Date().toLocaleString(locale === "fr" ? "fr-FR" : "en-US", { month: "long", year: "numeric" })}
-      </p>
-
-      <div className="px-5">
+      <div className="px-4 mt-3">
         {loading ? (
           <div className="flex justify-center py-16">
-            <Loader2 className="w-8 h-8 animate-spin" style={{ color: "var(--text-muted)" }} />
+            <Loader2 className="w-6 h-6 animate-spin" style={{ color: "var(--accent)" }} />
           </div>
         ) : entries.length === 0 ? (
-          <div className="text-center py-16 rounded-2xl border" style={{ background: "white", borderColor: "var(--border)" }}>
-            <p className="text-4xl mb-3">🌟</p>
+          <div className="text-center py-16 bg-white rounded-xl" style={{ border: "1px solid var(--border)" }}>
+            <Trophy className="w-8 h-8 mx-auto mb-3" style={{ color: "var(--text-muted)" }} />
             <p className="font-bold text-sm">{tt("leaderboard.no_entries")}</p>
-            <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>{tt("leaderboard.no_entries_sub")}</p>
+            <p className="text-[12px] mt-1" style={{ color: "var(--text-muted)" }}>{tt("leaderboard.no_entries_sub")}</p>
           </div>
         ) : (
           <div className="space-y-2">
             {entries.map((entry, index) => {
               const isMe = entry.username === me;
               const pos = index + 1;
-              const medal = pos === 1 ? "🥇" : pos === 2 ? "🥈" : pos === 3 ? "🥉" : `#${pos}`;
 
               return (
                 <motion.div
                   key={entry.username}
-                  initial={{ opacity: 0, y: 8 }}
+                  initial={{ opacity: 0, y: 6 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.04 }}
-                  className="flex items-center gap-3 rounded-2xl border p-3.5"
+                  transition={{ delay: index * 0.03 }}
+                  className="flex items-center gap-3 bg-white rounded-xl p-3"
                   style={{
-                    background: isMe ? "rgba(255,107,53,0.04)" : pos <= 3 ? "#FFFBEB" : "white",
-                    borderColor: isMe ? "var(--accent)" : "var(--border)",
-                    borderWidth: isMe ? 2 : 1,
+                    border: isMe ? "2px solid var(--accent)" : "1px solid var(--border)",
                   }}
                 >
-                  <div className="text-lg w-8 text-center font-bold">{medal}</div>
                   <div
-                    className="w-9 h-9 rounded-full flex items-center justify-center text-white font-bold text-xs flex-shrink-0"
-                    style={{ background: pos <= 3 ? "var(--accent)" : "#D1D5DB" }}
+                    className="w-7 h-7 rounded-full flex items-center justify-center text-[12px] font-bold flex-shrink-0"
+                    style={{
+                      background: pos <= 3 ? "var(--accent)" : "var(--bg)",
+                      color: pos <= 3 ? "white" : "var(--text-secondary)",
+                    }}
+                  >
+                    {pos}
+                  </div>
+                  <div
+                    className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-xs flex-shrink-0"
+                    style={{ background: pos <= 3 ? "var(--star)" : "#D1D5DB" }}
                   >
                     {entry.username.charAt(0).toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-sm truncate">
+                    <p className="font-semibold text-[13px] truncate">
                       {entry.username}
                       {isMe && (
-                        <span className="text-[10px] ml-1.5 font-semibold" style={{ color: "var(--accent)" }}>
+                        <span className="text-[10px] ml-1 font-semibold" style={{ color: "var(--accent)" }}>
                           {tt("leaderboard.you")}
                         </span>
                       )}
                     </p>
                     <p className="text-[10px] font-medium" style={{ color: "var(--text-muted)" }}>
-                      {RANK_EMOJIS[entry.rank] || ""} {tt(`rank.${entry.rank}`)}
+                      {tt(`rank.${entry.rank}`)}
                     </p>
                   </div>
-                  <div className="text-right flex-shrink-0">
-                    <div className="flex items-center gap-1 justify-end">
-                      <span className="text-lg font-extrabold">{entry.stars}</span>
-                      <span className="text-xs">⭐</span>
+                  <div className="text-right flex-shrink-0 flex items-center gap-3">
+                    <div className="flex items-center gap-1">
+                      <Star className="w-3 h-3" style={{ color: "var(--star)", fill: "var(--star)" }} />
+                      <span className="text-sm font-bold">{entry.stars}</span>
                     </div>
-                    <div className="flex items-center gap-0.5 justify-end">
-                      <span className="text-[10px]">🪙</span>
-                      <span className="text-[10px] font-semibold" style={{ color: "var(--gold)" }}>{entry.gold}</span>
+                    <div className="flex items-center gap-1">
+                      <Coins className="w-3 h-3" style={{ color: "var(--gold)" }} />
+                      <span className="text-[11px] font-semibold" style={{ color: "var(--gold)" }}>{entry.gold}</span>
                     </div>
                   </div>
                 </motion.div>

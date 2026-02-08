@@ -4,21 +4,22 @@ import { motion } from "framer-motion";
 import { Construction } from "lucide-react";
 
 interface ComingSoonProps {
-  emoji: string;
   title: string;
   description: string;
+  icon: React.ReactNode;
 }
 
-export default function ComingSoon({ emoji, title, description }: ComingSoonProps) {
+export default function ComingSoon({ title, description, icon }: ComingSoonProps) {
   return (
-    <div className="flex flex-col items-center justify-center px-8 pt-24 pb-32">
+    <div className="flex flex-col items-center justify-center px-8 pt-28 pb-32">
       <motion.div
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={{ type: "spring", stiffness: 200, damping: 15 }}
-        className="text-7xl mb-6"
+        className="w-16 h-16 rounded-2xl flex items-center justify-center mb-6"
+        style={{ background: "var(--accent-light)", color: "var(--accent)" }}
       >
-        {emoji}
+        {icon}
       </motion.div>
 
       <motion.div
@@ -28,15 +29,15 @@ export default function ComingSoon({ emoji, title, description }: ComingSoonProp
         className="text-center"
       >
         <div
-          className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-full mb-4"
-          style={{ background: "rgba(255,107,53,0.08)", color: "var(--accent)" }}
+          className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full mb-3"
+          style={{ background: "var(--accent-light)", color: "var(--accent)" }}
         >
-          <Construction className="w-3.5 h-3.5" />
+          <Construction className="w-3 h-3" />
           {title}
         </div>
 
         <p
-          className="text-sm leading-relaxed max-w-xs mx-auto"
+          className="text-[13px] leading-relaxed max-w-xs mx-auto"
           style={{ color: "var(--text-muted)" }}
         >
           {description}

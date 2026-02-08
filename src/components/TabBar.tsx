@@ -28,12 +28,8 @@ export default function TabBar({ t }: TabBarProps) {
 
   return (
     <div
-      className="fixed bottom-0 left-0 right-0 z-40"
-      style={{
-        background: "rgba(255,255,255,0.92)",
-        backdropFilter: "blur(12px)",
-        borderTop: "1px solid var(--border)",
-      }}
+      className="fixed bottom-0 left-0 right-0 z-40 bg-white"
+      style={{ borderTop: "1px solid var(--border)" }}
     >
       <div className="max-w-lg mx-auto flex">
         {tabs.map((tab) => {
@@ -42,13 +38,13 @@ export default function TabBar({ t }: TabBarProps) {
             <button
               key={tab.key}
               onClick={() => router.push(tab.path)}
-              className="flex-1 flex flex-col items-center gap-0.5 py-2.5 pt-3 relative transition-colors"
+              className="flex-1 flex flex-col items-center gap-0.5 py-2 pt-2.5 relative transition-colors"
               style={{ color: isActive ? "var(--accent)" : "var(--text-muted)" }}
             >
               {isActive && (
                 <motion.div
                   layoutId="tab-indicator"
-                  className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-[3px] rounded-full"
+                  className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-[2px] rounded-full"
                   style={{ background: "var(--accent)" }}
                   transition={{ type: "spring", stiffness: 400, damping: 30 }}
                 />
@@ -59,7 +55,6 @@ export default function TabBar({ t }: TabBarProps) {
           );
         })}
       </div>
-      {/* Safe area padding for notched phones */}
       <div className="h-[env(safe-area-inset-bottom)]" />
     </div>
   );

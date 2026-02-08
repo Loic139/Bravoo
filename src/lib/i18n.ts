@@ -10,16 +10,17 @@ const translations: Record<Locale, Record<string, string>> = {
     "app.login.signing_in": "Signing in...",
     "app.logout": "Logout",
     "app.loading": "Loading...",
-    "app.version": "v2.1.0",
+    "app.version": "v2.3.0",
 
     // Dashboard
     "dashboard.days_left": "Days left this month",
+    "dashboard.days_short": "d",
     "dashboard.gold": "Gold",
     "dashboard.stars_progress": "stars",
     "dashboard.stars_goal": "Goal: 4 stars this month",
     "dashboard.stars_reached": "You reached LEGEND status!",
-    "dashboard.stars_remaining": "{count} more stars to Legend",
-    "dashboard.leaderboard": "View Leaderboard",
+    "dashboard.stars_remaining": "{count} more star(s) to Legend",
+    "dashboard.leaderboard": "Leaderboard",
 
     // Quests
     "quests.daily": "Daily",
@@ -33,8 +34,9 @@ const translations: Record<Locale, Record<string, string>> = {
     "quests.new_quest_tomorrow": "New quest tomorrow",
     "quests.new_quests_monday": "New quests Monday",
     "quests.gold_reward": "+{amount} gold",
-    "quests.weekly_progress": "Weekly: {completed}/{total}",
-    "quests.star_earned": "Star earned this week!",
+    "quests.weekly_progress": "Week: {completed}/{total}",
+    "quests.star_earned": "Star earned!",
+    "quests.today_title": "Today's Quests",
 
     // Quest titles
     "quest.daily.squats10": "10 Squats",
@@ -134,16 +136,17 @@ const translations: Record<Locale, Record<string, string>> = {
     "app.login.signing_in": "Connexion...",
     "app.logout": "Deconnexion",
     "app.loading": "Chargement...",
-    "app.version": "v2.1.0",
+    "app.version": "v2.3.0",
 
     // Dashboard
     "dashboard.days_left": "Jours restants ce mois",
+    "dashboard.days_short": "j",
     "dashboard.gold": "Or",
     "dashboard.stars_progress": "etoiles",
     "dashboard.stars_goal": "Objectif : 4 etoiles ce mois",
     "dashboard.stars_reached": "Tu as atteint le rang LEGENDE !",
     "dashboard.stars_remaining": "Encore {count} etoile(s) pour la Legende",
-    "dashboard.leaderboard": "Voir le classement",
+    "dashboard.leaderboard": "Classement",
 
     // Quests
     "quests.daily": "Journaliere",
@@ -158,7 +161,8 @@ const translations: Record<Locale, Record<string, string>> = {
     "quests.new_quests_monday": "Nouvelles quetes lundi",
     "quests.gold_reward": "+{amount} or",
     "quests.weekly_progress": "Semaine : {completed}/{total}",
-    "quests.star_earned": "Etoile gagnee cette semaine !",
+    "quests.star_earned": "Etoile gagnee !",
+    "quests.today_title": "Quetes du jour",
 
     // Quest titles
     "quest.daily.squats10": "10 Squats",
