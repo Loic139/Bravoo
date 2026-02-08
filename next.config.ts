@@ -2,19 +2,23 @@ import type { NextConfig } from "next";
 import { readFileSync, existsSync } from "fs";
 import { resolve } from "path";
 
-// At build time, read the service account file and inject as env var.
-// This ensures Cloud Run has access to Firebase Admin credentials
-// even though the JSON file is not deployed.
+// At build time, read the service account JSON and inject via webpack DefinePlugin.
+// During `firebase deploy`, `next build` runs locally where the file exists.
+// The content is then baked into the server bundle for Cloud Run.
 const saPath = resolve(process.cwd(), "firebase-service-account.json");
-const serviceAccount =
-  !process.env.FIREBASE_SERVICE_ACCOUNT && existsSync(saPath)
-    ? readFileSync(saPath, "utf-8").replace(/\n/g, "")
-    : undefined;
+const saContent = existsSync(saPath) ? readFileSync(saPath, "utf-8") : null;
 
 const nextConfig: NextConfig = {
   serverExternalPackages: ["firebase-admin"],
-  env: {
-    ...(serviceAccount ? { FIREBASE_SERVICE_ACCOUNT: serviceAccount } : {}),
+  webpack: (config, { isServer, webpack }) => {
+    if (isServer && saContent) {
+      config.plugins.push(
+        new webpack.DefinePlugin({
+          "process.env.FIREBASE_SERVICE_ACCOUNT": JSON.stringify(saContent),
+        }),
+      );
+    }
+    return config;
   },
 };
 
